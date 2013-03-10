@@ -7,7 +7,7 @@
 AC_PREREQ(2.50)
 
 AC_INIT(top, 1.0)
-AC_CONFIG_SRCDIR([common/flit.vhd])
+AC_CONFIG_SRCDIR([top.qsf])
 AM_INIT_AUTOMAKE
 
 # Check for emu library
