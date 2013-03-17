@@ -19,7 +19,7 @@ architecture emu_top of emu_top is
     constant period : time := 1 ns;
 
     subtype data_t is std_logic_vector(63 downto 0);  -- FIXME
-    
+
     signal clk, reset : std_logic;
 
     -- rx
@@ -35,7 +35,7 @@ architecture emu_top of emu_top is
     -- http://ghdl.free.fr/ghdl/Restrictions-on-foreign-declarations.html
 
     procedure line_up(tx_dvalid                  : std_logic;
-                      data3, data2, data1, data0 : integer;
+                      dw0, dw1, dw2, dw3 : integer;
                       ej_ready                   : std_logic)
     is
     begin
@@ -45,7 +45,7 @@ architecture emu_top of emu_top is
     attribute foreign of line_up : procedure is "VHPIDIRECT line_up";
 
     procedure line_down(rx_dvalid                  : out std_logic;
-                        data3, data2, data1, data0 : out integer;
+                        dw0, dw1, dw2, dw3 : out integer;
                         rx_sop, rx_eop             : out std_logic;
                         ej_ready                   : out std_logic)
     is
@@ -81,7 +81,6 @@ begin
         variable v_rx_data                                   : data_t;
         variable v_rx_dvalid, v_rx_sop, v_rx_eop, v_ej_ready : std_logic;
         variable v_data3, v_data2, v_data1, v_data0          : integer;
-
     begin
         if reset = '1' then
             rx_data   <= (others => '0');
@@ -91,12 +90,12 @@ begin
             ej_ready  <= '0';
 
         elsif rising_edge(clk) then
-            line_down(v_rx_dvalid, v_data3, v_data2, v_data1, v_data0, v_rx_sop, v_rx_eop, v_ej_ready);
-            rx_data <= conv_std_logic_vector(v_data3, 16) &
-                       conv_std_logic_vector(v_data2, 16) &
-                       conv_std_logic_vector(v_data1, 16) &
-                       conv_std_logic_vector(v_data0, 16) & zeros64;
-            
+            line_down(v_rx_dvalid, v_data0, v_data1, v_data2, v_data3, v_rx_sop, v_rx_eop, v_ej_ready);
+            rx_data <= conv_std_logic_vector(v_data3, 32) &
+                       conv_std_logic_vector(v_data2, 32) &
+                       conv_std_logic_vector(v_data1, 32) &
+                       conv_std_logic_vector(v_data0, 32);
+
             rx_dvalid <= v_rx_dvalid;
             rx_sop    <= v_rx_sop;
             rx_eop    <= v_rx_eop;
@@ -109,10 +108,10 @@ begin
         if rising_edge(clk) then
             -- NB: also looping back ej_ready 
             line_up(tx_dvalid,
-                    conv_integer(tx_data(63 downto 48)),
-                    conv_integer(tx_data(47 downto 32)),
-                    conv_integer(tx_data(31 downto 16)),
-                    conv_integer(tx_data(15 downto 0)),
+                    conv_integer(tx_data(31 downto 0)),
+                    conv_integer(tx_data(63 downto 32)),
+                    conv_integer(tx_data(95 downto 64)),
+                    conv_integer(tx_data(127 downto 96)),
                     ej_ready);
         end if;
     end process;
