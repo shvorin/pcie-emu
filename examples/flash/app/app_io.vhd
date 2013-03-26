@@ -8,6 +8,7 @@ use ieee.std_logic_unsigned.all;
 use ieee.std_logic_misc.all;
 
 use work.tlp_package.all;
+use work.fm_pkg.all;
 
 -------------------------------------------------------------------------------
 -- Parameters
@@ -73,7 +74,20 @@ entity app_io is
         pm_data               : out std_logic_vector(9 downto 0);
         test_sim              : in  std_logic;
         clk_in                : in  std_logic;
-        rstn                  : in  std_logic);
+        rstn                  : in  std_logic;
+
+        -- flash interface
+        flash_address : inout std_logic_vector (ADDR_SZ - 1 downto 0);
+        nflash_ce0    : inout std_logic;
+        nflash_ce1    : inout std_logic;
+        nflash_we     : inout std_logic;
+        nflash_oe     : inout std_logic;
+        flash_data    : inout std_logic_vector (31 downto 0);
+        nflash_reset  : inout std_logic;
+        flash_clk     : inout std_logic;
+        flash_wait0   : in    std_logic;
+        flash_wait1   : in    std_logic;
+        nflash_adv    : inout std_logic);
 end entity app_io;
 
 architecture app of app_io is
@@ -168,20 +182,46 @@ begin
     tx_root_bp.ej_ready  <= ej_ready;
 
     -- applications are the clients of TLP-switch
-    apps : for i in competitors_range generate
-        app : entity work.tlp_fifo_loopback
+    apps : block
+    begin
+        -- client #0
+        fm : entity work.flash_manager
+            port map (rx_data       => rx_subs(0).data,
+                      rx_dvalid     => rx_subs(0).dvalid,
+                      rx_sop        => rx_subs(0).sop,
+                      rx_eop        => rx_subs(0).eop,
+                      tx_data       => tx_subs(0).data,
+                      tx_dvalid     => tx_subs(0).dvalid,
+                      ej_ready      => tx_subs_bp(0).ej_ready,
+                      clk           => clk_in,
+                      reset         => reset,
+                      -- flash
+                      flash_address => flash_address,
+                      nflash_ce0    => nflash_ce0,
+                      nflash_ce1    => nflash_ce1,
+                      nflash_we     => nflash_we,
+                      nflash_oe     => nflash_oe,
+                      flash_data    => flash_data,
+                      nflash_reset  => nflash_reset,
+                      flash_clk     => flash_clk,
+                      flash_wait0   => flash_wait0,
+                      flash_wait1   => flash_wait1,
+                      nflash_adv    => nflash_adv);
+
+        -- client #1
+        loopback : entity work.tlp_fifo_loopback
             generic map (DATA_WIDTH => 128,
-                         APP_INDEX  => i)
-            port map (rx_data   => rx_subs(i).data,
-                      rx_dvalid => rx_subs(i).dvalid,
-                      rx_sop    => rx_subs(i).sop,
-                      rx_eop    => rx_subs(i).eop,
-                      tx_data   => tx_subs(i).data,
-                      tx_dvalid => tx_subs(i).dvalid,
-                      ej_ready  => tx_subs_bp(i).ej_ready,
+                         APP_INDEX  => 1)
+            port map (rx_data   => rx_subs(1).data,
+                      rx_dvalid => rx_subs(1).dvalid,
+                      rx_sop    => rx_subs(1).sop,
+                      rx_eop    => rx_subs(1).eop,
+                      tx_data   => tx_subs(1).data,
+                      tx_dvalid => tx_subs(1).dvalid,
+                      ej_ready  => tx_subs_bp(1).ej_ready,
                       clk       => clk_in,
                       reset     => reset);
-    end generate;
+    end block apps;
 
     -- DMX part of TLP-switch
     dmx : entity work.tlp_rx_dmx

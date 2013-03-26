@@ -26,11 +26,23 @@ entity top is
 		hip_serial_tx_out4        : out std_logic;                                        -- tx_out4
 		hip_serial_tx_out5        : out std_logic;                                        -- tx_out5
 		hip_serial_tx_out6        : out std_logic;                                        -- tx_out6
-		hip_serial_tx_out7        : out std_logic                                        -- tx_out7
+		hip_serial_tx_out7        : out std_logic;
+
+		flash_address 		 			: inout STD_LOGIC_VECTOR (25 downto 0);
+		nflash_ce0				 		: inout STD_LOGIC;
+		nflash_ce1				 		: inout STD_LOGIC;
+		nflash_we				 		: inout STD_LOGIC;
+		nflash_oe				 		: inout STD_LOGIC;
+		flash_data			 			: inout STD_LOGIC_VECTOR (31 downto 0);
+		nflash_reset					: inout STD_LOGIC;
+		flash_clk						: inout STD_LOGIC;
+		flash_wait0						: in STD_LOGIC;
+		flash_wait1						: in STD_LOGIC;
+		nflash_adv						: inout STD_LOGIC
 	);
 end entity;
 	
-architecture top_arch of top is	
+architecture top_arch of top is
 	component pcie_de_gen1_x8_ast128 is
 		port (
 			hip_ctrl_test_in          : in  std_logic_vector(31 downto 0) := (others => 'X'); -- test_in
@@ -194,9 +206,21 @@ architecture top_arch of top is
 			pcie_rstn_npor            : in  std_logic                     := 'X';             -- npor
 			pcie_rstn_pin_perst       : in  std_logic                     := 'X';             -- pin_perst
 			clk_clk                   : in  std_logic                     := 'X';             -- clk
-			reset_reset_n             : in  std_logic                     := 'X'              -- reset_n
+			reset_reset_n             : in  std_logic                     := 'X';              -- reset_n
+			
+			flash_address 		 			: inout STD_LOGIC_VECTOR (25 downto 0);
+			nflash_ce0				 		: inout STD_LOGIC;
+			nflash_ce1				 		: inout STD_LOGIC;
+			nflash_we				 		: inout STD_LOGIC;
+			nflash_oe				 		: inout STD_LOGIC;
+			flash_data			 			: inout STD_LOGIC_VECTOR (31 downto 0);
+			nflash_reset					: inout STD_LOGIC;
+			flash_clk						: inout STD_LOGIC;
+			flash_wait0						: in STD_LOGIC;
+			flash_wait1						: in STD_LOGIC;
+			nflash_adv						: inout STD_LOGIC
 		);
-	end component pcie_de_gen1_x8_ast128;
+	end component;
 
 			signal hip_ctrl_test_in          : std_logic_vector(31 downto 0) := (others => 'X'); -- test_in
 			signal hip_ctrl_simu_mode_pipe   : std_logic                     := 'X';             -- simu_mode_pipe
@@ -417,10 +441,22 @@ DUT : pcie_de_gen1_x8_ast128 port map (
 			hip_pipe_rxvalid6         => hip_pipe_rxvalid6,
 			hip_pipe_rxvalid7         => hip_pipe_rxvalid7,
 			refclk_clk                => refclk_clk,
-            pcie_rstn_npor      => pcie_rstn_pin_perst,
-            pcie_rstn_pin_perst => pcie_rstn_pin_perst,
-            clk_clk             => refclk_clk,
-            reset_reset_n       => pcie_rstn_pin_perst
+			pcie_rstn_npor            => pcie_rstn_pin_perst,
+			pcie_rstn_pin_perst       => pcie_rstn_pin_perst,
+			clk_clk                   => refclk_clk,
+			reset_reset_n             => pcie_rstn_pin_perst,
+			
+			flash_address 		 		  => flash_address,
+			nflash_ce0				 	  => nflash_ce0,
+			nflash_ce1				 	  => nflash_ce1,
+			nflash_we				 	  => nflash_we,
+			nflash_oe				 	  => nflash_oe,
+			flash_data			 		  => flash_data,
+			nflash_reset		 		  => nflash_reset,
+			flash_clk			 		  => flash_clk,
+			flash_wait0					  => flash_wait0,
+			flash_wait1					  => flash_wait1,
+			nflash_adv					  => nflash_adv
 			);
 
 end architecture;

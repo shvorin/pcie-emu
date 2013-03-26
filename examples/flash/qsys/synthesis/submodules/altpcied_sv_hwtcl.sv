@@ -157,9 +157,19 @@ module altpcied_sv_hwtcl # (
       input [5 : 0]        tx_cred_fcinfinite,
       input [7 : 0]        tx_cred_hdrfccp,
       input [7 : 0]        tx_cred_hdrfcnp,
-      input [7 : 0]        tx_cred_hdrfcp
+      input [7 : 0]        tx_cred_hdrfcp,
 
-      );
+	  output [25 : 0]	flash_address,
+	  output				nflash_ce0,
+	  output				nflash_ce1,
+	  output 				nflash_we,
+	  output 				nflash_oe,
+	  inout [31 : 0]		flash_data,
+	  output nflash_reset,
+	  output flash_clk,
+	  input flash_wait0,
+	  input flash_wait1,
+	  output nflash_adv);
 
       assign                derr_cor_ext_rcv_drv = derr_cor_ext_rcv;
       assign                derr_cor_ext_rpl_drv = derr_cor_ext_rpl;
@@ -510,7 +520,19 @@ wire [1:0]  tx_st_empty_int;
             .tx_stream_data0_1      (tx_stream_data0_1),
             .tx_stream_mask0        (1'b0),
             .tx_stream_ready0       (tx_st_ready),
-            .tx_stream_valid0       (tx_st_valid[0]));
+            .tx_stream_valid0       (tx_st_valid[0]),
+
+			.flash_address 		(flash_address), 
+			.nflash_ce0			 (nflash_ce0), 
+			.nflash_ce1			 (nflash_ce1),
+			.nflash_we			 (nflash_we), 
+			.nflash_oe			 (nflash_oe), 
+			.flash_data			 (flash_data),
+			.nflash_reset		 (nflash_reset),
+			.flash_clk			 (flash_clk),
+			.flash_wait0		 (flash_wait0),
+			.flash_wait1   	 (flash_wait1),
+			.nflash_adv			 (nflash_adv));
    end
 end
 endgenerate
