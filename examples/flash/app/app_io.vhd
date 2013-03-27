@@ -149,7 +149,7 @@ architecture app of app_io is
 
     ---------------------------------------------------------------------------
 
-    constant ARITY : positive := 2;
+    constant ARITY : positive := 1;     -- NB: flash is the only app
     subtype  competitors_range is integer range 0 to ARITY-1;
 
     signal rx_root    : tlp_rx;
@@ -208,19 +208,20 @@ begin
                       flash_wait1   => flash_wait1,
                       nflash_adv    => nflash_adv);
 
+        -- NB: flash is the only app
         -- client #1
-        loopback : entity work.tlp_fifo_loopback
-            generic map (DATA_WIDTH => 128,
-                         APP_INDEX  => 1)
-            port map (rx_data   => rx_subs(1).data,
-                      rx_dvalid => rx_subs(1).dvalid,
-                      rx_sop    => rx_subs(1).sop,
-                      rx_eop    => rx_subs(1).eop,
-                      tx_data   => tx_subs(1).data,
-                      tx_dvalid => tx_subs(1).dvalid,
-                      ej_ready  => tx_subs_bp(1).ej_ready,
-                      clk       => clk_in,
-                      reset     => reset);
+        --loopback : entity work.tlp_fifo_loopback
+        --    generic map (DATA_WIDTH => 128,
+        --                 APP_INDEX  => 1)
+        --    port map (rx_data   => rx_subs(1).data,
+        --              rx_dvalid => rx_subs(1).dvalid,
+        --              rx_sop    => rx_subs(1).sop,
+        --              rx_eop    => rx_subs(1).eop,
+        --              tx_data   => tx_subs(1).data,
+        --              tx_dvalid => tx_subs(1).dvalid,
+        --              ej_ready  => tx_subs_bp(1).ej_ready,
+        --              clk       => clk_in,
+        --              reset     => reset);
     end block apps;
 
     -- DMX part of TLP-switch

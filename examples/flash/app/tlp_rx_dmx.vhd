@@ -29,18 +29,19 @@ architecture tlp_rx_dmx of tlp_rx_dmx is
 
         variable result : competitors_t := (others => '0');
     begin
-        case info.kind is
-            when kind_MRd32 | kind_MRd64 | kind_MWr32 | kind_MWr64 =>
-                for i in competitors_t'range loop
-                    -- ad hoc target choice
-                    if conv_integer(addr(11 downto 8)) = i then
-                        result(i) := '1';
-                        return result;
-                    end if;
-                end loop;
+        -- NB: flash is the only app
+        --case info.kind is
+        --    when kind_MRd32 | kind_MRd64 | kind_MWr32 | kind_MWr64 =>
+        --        for i in competitors_t'range loop
+        --            -- ad hoc target choice
+        --            if conv_integer(addr(11 downto 8)) = i then
+        --                result(i) := '1';
+        --                return result;
+        --            end if;
+        --        end loop;
                 
-            when others => null;
-        end case;
+        --    when others => null;
+        --end case;
 
         return (0 => '1', others => '0');  -- default target is 0-th
     end;
