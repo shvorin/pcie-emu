@@ -4,180 +4,180 @@
 
 `timescale 1 ps / 1 ps
 module pcie_de_gen1_x8_ast128 (
-		input wire        refclk_clk, //     refclk.clk
-		input wire [31:0] hip_ctrl_test_in, //   hip_ctrl.test_in
-		input wire        hip_ctrl_simu_mode_pipe, //           .simu_mode_pipe
-		input wire        hip_serial_rx_in0, // hip_serial.rx_in0
-		input wire        hip_serial_rx_in1, //           .rx_in1
-		input wire        hip_serial_rx_in2, //           .rx_in2
-		input wire        hip_serial_rx_in3, //           .rx_in3
-		input wire        hip_serial_rx_in4, //           .rx_in4
-		input wire        hip_serial_rx_in5, //           .rx_in5
-		input wire        hip_serial_rx_in6, //           .rx_in6
-		input wire        hip_serial_rx_in7, //           .rx_in7
-		output wire       hip_serial_tx_out0, //           .tx_out0
-		output wire       hip_serial_tx_out1, //           .tx_out1
-		output wire       hip_serial_tx_out2, //           .tx_out2
-		output wire       hip_serial_tx_out3, //           .tx_out3
-		output wire       hip_serial_tx_out4, //           .tx_out4
-		output wire       hip_serial_tx_out5, //           .tx_out5
-		output wire       hip_serial_tx_out6, //           .tx_out6
-		output wire       hip_serial_tx_out7, //           .tx_out7
-		input wire        hip_pipe_sim_pipe_pclk_in, //   hip_pipe.sim_pipe_pclk_in
-		output wire [1:0] hip_pipe_sim_pipe_rate, //           .sim_pipe_rate
-		output wire [4:0] hip_pipe_sim_ltssmstate, //           .sim_ltssmstate
-		output wire [2:0] hip_pipe_eidleinfersel0, //           .eidleinfersel0
-		output wire [2:0] hip_pipe_eidleinfersel1, //           .eidleinfersel1
-		output wire [2:0] hip_pipe_eidleinfersel2, //           .eidleinfersel2
-		output wire [2:0] hip_pipe_eidleinfersel3, //           .eidleinfersel3
-		output wire [2:0] hip_pipe_eidleinfersel4, //           .eidleinfersel4
-		output wire [2:0] hip_pipe_eidleinfersel5, //           .eidleinfersel5
-		output wire [2:0] hip_pipe_eidleinfersel6, //           .eidleinfersel6
-		output wire [2:0] hip_pipe_eidleinfersel7, //           .eidleinfersel7
-		output wire [1:0] hip_pipe_powerdown0, //           .powerdown0
-		output wire [1:0] hip_pipe_powerdown1, //           .powerdown1
-		output wire [1:0] hip_pipe_powerdown2, //           .powerdown2
-		output wire [1:0] hip_pipe_powerdown3, //           .powerdown3
-		output wire [1:0] hip_pipe_powerdown4, //           .powerdown4
-		output wire [1:0] hip_pipe_powerdown5, //           .powerdown5
-		output wire [1:0] hip_pipe_powerdown6, //           .powerdown6
-		output wire [1:0] hip_pipe_powerdown7, //           .powerdown7
-		output wire       hip_pipe_rxpolarity0, //           .rxpolarity0
-		output wire       hip_pipe_rxpolarity1, //           .rxpolarity1
-		output wire       hip_pipe_rxpolarity2, //           .rxpolarity2
-		output wire       hip_pipe_rxpolarity3, //           .rxpolarity3
-		output wire       hip_pipe_rxpolarity4, //           .rxpolarity4
-		output wire       hip_pipe_rxpolarity5, //           .rxpolarity5
-		output wire       hip_pipe_rxpolarity6, //           .rxpolarity6
-		output wire       hip_pipe_rxpolarity7, //           .rxpolarity7
-		output wire       hip_pipe_txcompl0, //           .txcompl0
-		output wire       hip_pipe_txcompl1, //           .txcompl1
-		output wire       hip_pipe_txcompl2, //           .txcompl2
-		output wire       hip_pipe_txcompl3, //           .txcompl3
-		output wire       hip_pipe_txcompl4, //           .txcompl4
-		output wire       hip_pipe_txcompl5, //           .txcompl5
-		output wire       hip_pipe_txcompl6, //           .txcompl6
-		output wire       hip_pipe_txcompl7, //           .txcompl7
-		output wire [7:0] hip_pipe_txdata0, //           .txdata0
-		output wire [7:0] hip_pipe_txdata1, //           .txdata1
-		output wire [7:0] hip_pipe_txdata2, //           .txdata2
-		output wire [7:0] hip_pipe_txdata3, //           .txdata3
-		output wire [7:0] hip_pipe_txdata4, //           .txdata4
-		output wire [7:0] hip_pipe_txdata5, //           .txdata5
-		output wire [7:0] hip_pipe_txdata6, //           .txdata6
-		output wire [7:0] hip_pipe_txdata7, //           .txdata7
-		output wire       hip_pipe_txdatak0, //           .txdatak0
-		output wire       hip_pipe_txdatak1, //           .txdatak1
-		output wire       hip_pipe_txdatak2, //           .txdatak2
-		output wire       hip_pipe_txdatak3, //           .txdatak3
-		output wire       hip_pipe_txdatak4, //           .txdatak4
-		output wire       hip_pipe_txdatak5, //           .txdatak5
-		output wire       hip_pipe_txdatak6, //           .txdatak6
-		output wire       hip_pipe_txdatak7, //           .txdatak7
-		output wire       hip_pipe_txdetectrx0, //           .txdetectrx0
-		output wire       hip_pipe_txdetectrx1, //           .txdetectrx1
-		output wire       hip_pipe_txdetectrx2, //           .txdetectrx2
-		output wire       hip_pipe_txdetectrx3, //           .txdetectrx3
-		output wire       hip_pipe_txdetectrx4, //           .txdetectrx4
-		output wire       hip_pipe_txdetectrx5, //           .txdetectrx5
-		output wire       hip_pipe_txdetectrx6, //           .txdetectrx6
-		output wire       hip_pipe_txdetectrx7, //           .txdetectrx7
-		output wire       hip_pipe_txelecidle0, //           .txelecidle0
-		output wire       hip_pipe_txelecidle1, //           .txelecidle1
-		output wire       hip_pipe_txelecidle2, //           .txelecidle2
-		output wire       hip_pipe_txelecidle3, //           .txelecidle3
-		output wire       hip_pipe_txelecidle4, //           .txelecidle4
-		output wire       hip_pipe_txelecidle5, //           .txelecidle5
-		output wire       hip_pipe_txelecidle6, //           .txelecidle6
-		output wire       hip_pipe_txelecidle7, //           .txelecidle7
-		output wire       hip_pipe_txdeemph0, //           .txdeemph0
-		output wire       hip_pipe_txdeemph1, //           .txdeemph1
-		output wire       hip_pipe_txdeemph2, //           .txdeemph2
-		output wire       hip_pipe_txdeemph3, //           .txdeemph3
-		output wire       hip_pipe_txdeemph4, //           .txdeemph4
-		output wire       hip_pipe_txdeemph5, //           .txdeemph5
-		output wire       hip_pipe_txdeemph6, //           .txdeemph6
-		output wire       hip_pipe_txdeemph7, //           .txdeemph7
-		output wire [2:0] hip_pipe_txmargin0, //           .txmargin0
-		output wire [2:0] hip_pipe_txmargin1, //           .txmargin1
-		output wire [2:0] hip_pipe_txmargin2, //           .txmargin2
-		output wire [2:0] hip_pipe_txmargin3, //           .txmargin3
-		output wire [2:0] hip_pipe_txmargin4, //           .txmargin4
-		output wire [2:0] hip_pipe_txmargin5, //           .txmargin5
-		output wire [2:0] hip_pipe_txmargin6, //           .txmargin6
-		output wire [2:0] hip_pipe_txmargin7, //           .txmargin7
-		output wire       hip_pipe_txswing0, //           .txswing0
-		output wire       hip_pipe_txswing1, //           .txswing1
-		output wire       hip_pipe_txswing2, //           .txswing2
-		output wire       hip_pipe_txswing3, //           .txswing3
-		output wire       hip_pipe_txswing4, //           .txswing4
-		output wire       hip_pipe_txswing5, //           .txswing5
-		output wire       hip_pipe_txswing6, //           .txswing6
-		output wire       hip_pipe_txswing7, //           .txswing7
-		input wire        hip_pipe_phystatus0, //           .phystatus0
-		input wire        hip_pipe_phystatus1, //           .phystatus1
-		input wire        hip_pipe_phystatus2, //           .phystatus2
-		input wire        hip_pipe_phystatus3, //           .phystatus3
-		input wire        hip_pipe_phystatus4, //           .phystatus4
-		input wire        hip_pipe_phystatus5, //           .phystatus5
-		input wire        hip_pipe_phystatus6, //           .phystatus6
-		input wire        hip_pipe_phystatus7, //           .phystatus7
-		input wire [7:0]  hip_pipe_rxdata0, //           .rxdata0
-		input wire [7:0]  hip_pipe_rxdata1, //           .rxdata1
-		input wire [7:0]  hip_pipe_rxdata2, //           .rxdata2
-		input wire [7:0]  hip_pipe_rxdata3, //           .rxdata3
-		input wire [7:0]  hip_pipe_rxdata4, //           .rxdata4
-		input wire [7:0]  hip_pipe_rxdata5, //           .rxdata5
-		input wire [7:0]  hip_pipe_rxdata6, //           .rxdata6
-		input wire [7:0]  hip_pipe_rxdata7, //           .rxdata7
-		input wire        hip_pipe_rxdatak0, //           .rxdatak0
-		input wire        hip_pipe_rxdatak1, //           .rxdatak1
-		input wire        hip_pipe_rxdatak2, //           .rxdatak2
-		input wire        hip_pipe_rxdatak3, //           .rxdatak3
-		input wire        hip_pipe_rxdatak4, //           .rxdatak4
-		input wire        hip_pipe_rxdatak5, //           .rxdatak5
-		input wire        hip_pipe_rxdatak6, //           .rxdatak6
-		input wire        hip_pipe_rxdatak7, //           .rxdatak7
-		input wire        hip_pipe_rxelecidle0, //           .rxelecidle0
-		input wire        hip_pipe_rxelecidle1, //           .rxelecidle1
-		input wire        hip_pipe_rxelecidle2, //           .rxelecidle2
-		input wire        hip_pipe_rxelecidle3, //           .rxelecidle3
-		input wire        hip_pipe_rxelecidle4, //           .rxelecidle4
-		input wire        hip_pipe_rxelecidle5, //           .rxelecidle5
-		input wire        hip_pipe_rxelecidle6, //           .rxelecidle6
-		input wire        hip_pipe_rxelecidle7, //           .rxelecidle7
-		input wire [2:0]  hip_pipe_rxstatus0, //           .rxstatus0
-		input wire [2:0]  hip_pipe_rxstatus1, //           .rxstatus1
-		input wire [2:0]  hip_pipe_rxstatus2, //           .rxstatus2
-		input wire [2:0]  hip_pipe_rxstatus3, //           .rxstatus3
-		input wire [2:0]  hip_pipe_rxstatus4, //           .rxstatus4
-		input wire [2:0]  hip_pipe_rxstatus5, //           .rxstatus5
-		input wire [2:0]  hip_pipe_rxstatus6, //           .rxstatus6
-		input wire [2:0]  hip_pipe_rxstatus7, //           .rxstatus7
-		input wire        hip_pipe_rxvalid0, //           .rxvalid0
-		input wire        hip_pipe_rxvalid1, //           .rxvalid1
-		input wire        hip_pipe_rxvalid2, //           .rxvalid2
-		input wire        hip_pipe_rxvalid3, //           .rxvalid3
-		input wire        hip_pipe_rxvalid4, //           .rxvalid4
-		input wire        hip_pipe_rxvalid5, //           .rxvalid5
-		input wire        hip_pipe_rxvalid6, //           .rxvalid6
-		input wire        hip_pipe_rxvalid7, //           .rxvalid7
-		input wire        pcie_rstn_npor, //  pcie_rstn.npor
-		input wire        pcie_rstn_pin_perst, //           .pin_perst
-		input wire        reset_reset_n, //      reset.reset_n
-		input wire        clk_clk, //        clk.clk
-
-		output [25 : 0]   flash_address,
-	    output            nflash_ce0,
-		output            nflash_ce1,
-		output            nflash_we,
-		output            nflash_oe,
-		inout [31 : 0]    flash_data,
-		output            nflash_reset,
-		output            flash_clk,
-		input             flash_wait0,
-		input             flash_wait1,
-		output            nflash_adv);
+		input  wire        refclk_clk,                //     refclk.clk
+		input  wire [31:0] hip_ctrl_test_in,          //   hip_ctrl.test_in
+		input  wire        hip_ctrl_simu_mode_pipe,   //           .simu_mode_pipe
+		input  wire        hip_serial_rx_in0,         // hip_serial.rx_in0
+		input  wire        hip_serial_rx_in1,         //           .rx_in1
+		input  wire        hip_serial_rx_in2,         //           .rx_in2
+		input  wire        hip_serial_rx_in3,         //           .rx_in3
+		input  wire        hip_serial_rx_in4,         //           .rx_in4
+		input  wire        hip_serial_rx_in5,         //           .rx_in5
+		input  wire        hip_serial_rx_in6,         //           .rx_in6
+		input  wire        hip_serial_rx_in7,         //           .rx_in7
+		output wire        hip_serial_tx_out0,        //           .tx_out0
+		output wire        hip_serial_tx_out1,        //           .tx_out1
+		output wire        hip_serial_tx_out2,        //           .tx_out2
+		output wire        hip_serial_tx_out3,        //           .tx_out3
+		output wire        hip_serial_tx_out4,        //           .tx_out4
+		output wire        hip_serial_tx_out5,        //           .tx_out5
+		output wire        hip_serial_tx_out6,        //           .tx_out6
+		output wire        hip_serial_tx_out7,        //           .tx_out7
+		input  wire        hip_pipe_sim_pipe_pclk_in, //   hip_pipe.sim_pipe_pclk_in
+		output wire [1:0]  hip_pipe_sim_pipe_rate,    //           .sim_pipe_rate
+		output wire [4:0]  hip_pipe_sim_ltssmstate,   //           .sim_ltssmstate
+		output wire [2:0]  hip_pipe_eidleinfersel0,   //           .eidleinfersel0
+		output wire [2:0]  hip_pipe_eidleinfersel1,   //           .eidleinfersel1
+		output wire [2:0]  hip_pipe_eidleinfersel2,   //           .eidleinfersel2
+		output wire [2:0]  hip_pipe_eidleinfersel3,   //           .eidleinfersel3
+		output wire [2:0]  hip_pipe_eidleinfersel4,   //           .eidleinfersel4
+		output wire [2:0]  hip_pipe_eidleinfersel5,   //           .eidleinfersel5
+		output wire [2:0]  hip_pipe_eidleinfersel6,   //           .eidleinfersel6
+		output wire [2:0]  hip_pipe_eidleinfersel7,   //           .eidleinfersel7
+		output wire [1:0]  hip_pipe_powerdown0,       //           .powerdown0
+		output wire [1:0]  hip_pipe_powerdown1,       //           .powerdown1
+		output wire [1:0]  hip_pipe_powerdown2,       //           .powerdown2
+		output wire [1:0]  hip_pipe_powerdown3,       //           .powerdown3
+		output wire [1:0]  hip_pipe_powerdown4,       //           .powerdown4
+		output wire [1:0]  hip_pipe_powerdown5,       //           .powerdown5
+		output wire [1:0]  hip_pipe_powerdown6,       //           .powerdown6
+		output wire [1:0]  hip_pipe_powerdown7,       //           .powerdown7
+		output wire        hip_pipe_rxpolarity0,      //           .rxpolarity0
+		output wire        hip_pipe_rxpolarity1,      //           .rxpolarity1
+		output wire        hip_pipe_rxpolarity2,      //           .rxpolarity2
+		output wire        hip_pipe_rxpolarity3,      //           .rxpolarity3
+		output wire        hip_pipe_rxpolarity4,      //           .rxpolarity4
+		output wire        hip_pipe_rxpolarity5,      //           .rxpolarity5
+		output wire        hip_pipe_rxpolarity6,      //           .rxpolarity6
+		output wire        hip_pipe_rxpolarity7,      //           .rxpolarity7
+		output wire        hip_pipe_txcompl0,         //           .txcompl0
+		output wire        hip_pipe_txcompl1,         //           .txcompl1
+		output wire        hip_pipe_txcompl2,         //           .txcompl2
+		output wire        hip_pipe_txcompl3,         //           .txcompl3
+		output wire        hip_pipe_txcompl4,         //           .txcompl4
+		output wire        hip_pipe_txcompl5,         //           .txcompl5
+		output wire        hip_pipe_txcompl6,         //           .txcompl6
+		output wire        hip_pipe_txcompl7,         //           .txcompl7
+		output wire [7:0]  hip_pipe_txdata0,          //           .txdata0
+		output wire [7:0]  hip_pipe_txdata1,          //           .txdata1
+		output wire [7:0]  hip_pipe_txdata2,          //           .txdata2
+		output wire [7:0]  hip_pipe_txdata3,          //           .txdata3
+		output wire [7:0]  hip_pipe_txdata4,          //           .txdata4
+		output wire [7:0]  hip_pipe_txdata5,          //           .txdata5
+		output wire [7:0]  hip_pipe_txdata6,          //           .txdata6
+		output wire [7:0]  hip_pipe_txdata7,          //           .txdata7
+		output wire        hip_pipe_txdatak0,         //           .txdatak0
+		output wire        hip_pipe_txdatak1,         //           .txdatak1
+		output wire        hip_pipe_txdatak2,         //           .txdatak2
+		output wire        hip_pipe_txdatak3,         //           .txdatak3
+		output wire        hip_pipe_txdatak4,         //           .txdatak4
+		output wire        hip_pipe_txdatak5,         //           .txdatak5
+		output wire        hip_pipe_txdatak6,         //           .txdatak6
+		output wire        hip_pipe_txdatak7,         //           .txdatak7
+		output wire        hip_pipe_txdetectrx0,      //           .txdetectrx0
+		output wire        hip_pipe_txdetectrx1,      //           .txdetectrx1
+		output wire        hip_pipe_txdetectrx2,      //           .txdetectrx2
+		output wire        hip_pipe_txdetectrx3,      //           .txdetectrx3
+		output wire        hip_pipe_txdetectrx4,      //           .txdetectrx4
+		output wire        hip_pipe_txdetectrx5,      //           .txdetectrx5
+		output wire        hip_pipe_txdetectrx6,      //           .txdetectrx6
+		output wire        hip_pipe_txdetectrx7,      //           .txdetectrx7
+		output wire        hip_pipe_txelecidle0,      //           .txelecidle0
+		output wire        hip_pipe_txelecidle1,      //           .txelecidle1
+		output wire        hip_pipe_txelecidle2,      //           .txelecidle2
+		output wire        hip_pipe_txelecidle3,      //           .txelecidle3
+		output wire        hip_pipe_txelecidle4,      //           .txelecidle4
+		output wire        hip_pipe_txelecidle5,      //           .txelecidle5
+		output wire        hip_pipe_txelecidle6,      //           .txelecidle6
+		output wire        hip_pipe_txelecidle7,      //           .txelecidle7
+		output wire        hip_pipe_txdeemph0,        //           .txdeemph0
+		output wire        hip_pipe_txdeemph1,        //           .txdeemph1
+		output wire        hip_pipe_txdeemph2,        //           .txdeemph2
+		output wire        hip_pipe_txdeemph3,        //           .txdeemph3
+		output wire        hip_pipe_txdeemph4,        //           .txdeemph4
+		output wire        hip_pipe_txdeemph5,        //           .txdeemph5
+		output wire        hip_pipe_txdeemph6,        //           .txdeemph6
+		output wire        hip_pipe_txdeemph7,        //           .txdeemph7
+		output wire [2:0]  hip_pipe_txmargin0,        //           .txmargin0
+		output wire [2:0]  hip_pipe_txmargin1,        //           .txmargin1
+		output wire [2:0]  hip_pipe_txmargin2,        //           .txmargin2
+		output wire [2:0]  hip_pipe_txmargin3,        //           .txmargin3
+		output wire [2:0]  hip_pipe_txmargin4,        //           .txmargin4
+		output wire [2:0]  hip_pipe_txmargin5,        //           .txmargin5
+		output wire [2:0]  hip_pipe_txmargin6,        //           .txmargin6
+		output wire [2:0]  hip_pipe_txmargin7,        //           .txmargin7
+		output wire        hip_pipe_txswing0,         //           .txswing0
+		output wire        hip_pipe_txswing1,         //           .txswing1
+		output wire        hip_pipe_txswing2,         //           .txswing2
+		output wire        hip_pipe_txswing3,         //           .txswing3
+		output wire        hip_pipe_txswing4,         //           .txswing4
+		output wire        hip_pipe_txswing5,         //           .txswing5
+		output wire        hip_pipe_txswing6,         //           .txswing6
+		output wire        hip_pipe_txswing7,         //           .txswing7
+		input  wire        hip_pipe_phystatus0,       //           .phystatus0
+		input  wire        hip_pipe_phystatus1,       //           .phystatus1
+		input  wire        hip_pipe_phystatus2,       //           .phystatus2
+		input  wire        hip_pipe_phystatus3,       //           .phystatus3
+		input  wire        hip_pipe_phystatus4,       //           .phystatus4
+		input  wire        hip_pipe_phystatus5,       //           .phystatus5
+		input  wire        hip_pipe_phystatus6,       //           .phystatus6
+		input  wire        hip_pipe_phystatus7,       //           .phystatus7
+		input  wire [7:0]  hip_pipe_rxdata0,          //           .rxdata0
+		input  wire [7:0]  hip_pipe_rxdata1,          //           .rxdata1
+		input  wire [7:0]  hip_pipe_rxdata2,          //           .rxdata2
+		input  wire [7:0]  hip_pipe_rxdata3,          //           .rxdata3
+		input  wire [7:0]  hip_pipe_rxdata4,          //           .rxdata4
+		input  wire [7:0]  hip_pipe_rxdata5,          //           .rxdata5
+		input  wire [7:0]  hip_pipe_rxdata6,          //           .rxdata6
+		input  wire [7:0]  hip_pipe_rxdata7,          //           .rxdata7
+		input  wire        hip_pipe_rxdatak0,         //           .rxdatak0
+		input  wire        hip_pipe_rxdatak1,         //           .rxdatak1
+		input  wire        hip_pipe_rxdatak2,         //           .rxdatak2
+		input  wire        hip_pipe_rxdatak3,         //           .rxdatak3
+		input  wire        hip_pipe_rxdatak4,         //           .rxdatak4
+		input  wire        hip_pipe_rxdatak5,         //           .rxdatak5
+		input  wire        hip_pipe_rxdatak6,         //           .rxdatak6
+		input  wire        hip_pipe_rxdatak7,         //           .rxdatak7
+		input  wire        hip_pipe_rxelecidle0,      //           .rxelecidle0
+		input  wire        hip_pipe_rxelecidle1,      //           .rxelecidle1
+		input  wire        hip_pipe_rxelecidle2,      //           .rxelecidle2
+		input  wire        hip_pipe_rxelecidle3,      //           .rxelecidle3
+		input  wire        hip_pipe_rxelecidle4,      //           .rxelecidle4
+		input  wire        hip_pipe_rxelecidle5,      //           .rxelecidle5
+		input  wire        hip_pipe_rxelecidle6,      //           .rxelecidle6
+		input  wire        hip_pipe_rxelecidle7,      //           .rxelecidle7
+		input  wire [2:0]  hip_pipe_rxstatus0,        //           .rxstatus0
+		input  wire [2:0]  hip_pipe_rxstatus1,        //           .rxstatus1
+		input  wire [2:0]  hip_pipe_rxstatus2,        //           .rxstatus2
+		input  wire [2:0]  hip_pipe_rxstatus3,        //           .rxstatus3
+		input  wire [2:0]  hip_pipe_rxstatus4,        //           .rxstatus4
+		input  wire [2:0]  hip_pipe_rxstatus5,        //           .rxstatus5
+		input  wire [2:0]  hip_pipe_rxstatus6,        //           .rxstatus6
+		input  wire [2:0]  hip_pipe_rxstatus7,        //           .rxstatus7
+		input  wire        hip_pipe_rxvalid0,         //           .rxvalid0
+		input  wire        hip_pipe_rxvalid1,         //           .rxvalid1
+		input  wire        hip_pipe_rxvalid2,         //           .rxvalid2
+		input  wire        hip_pipe_rxvalid3,         //           .rxvalid3
+		input  wire        hip_pipe_rxvalid4,         //           .rxvalid4
+		input  wire        hip_pipe_rxvalid5,         //           .rxvalid5
+		input  wire        hip_pipe_rxvalid6,         //           .rxvalid6
+		input  wire        hip_pipe_rxvalid7,         //           .rxvalid7
+		input  wire        pcie_rstn_npor,            //  pcie_rstn.npor
+		input  wire        pcie_rstn_pin_perst,       //           .pin_perst
+		input  wire        reset_reset_n,             //      reset.reset_n
+		input  wire        clk_clk,                    //        clk.clk
+		output [25 : 0]	flash_address,
+	   output				nflash_ce0,
+		output				nflash_ce1,
+		output 				nflash_we,
+		output 				nflash_oe,
+		inout [31 : 0]		flash_data,
+		output nflash_reset,
+		output flash_clk,
+		input flash_wait0,
+		input flash_wait1,
+		output nflash_adv
+	);
 
 	wire          apps_int_msi_app_msi_req;                              // APPS:app_msi_req -> DUT:app_msi_req
 	wire          dut_int_msi_app_msi_ack;                               // DUT:app_msi_ack -> APPS:app_msi_ack
@@ -290,7 +290,7 @@ module pcie_de_gen1_x8_ast128 (
 		.use_config_bypass_hwtcl                  (0),
 		.hip_reconfig_hwtcl                       (0),
 		.enable_tl_only_sim_hwtcl                 (0),
-		.bar0_size_mask_hwtcl                     (28),
+		.bar0_size_mask_hwtcl                     (29),
 		.bar0_io_space_hwtcl                      ("Disabled"),
 		.bar0_64bit_mem_space_hwtcl               ("Enabled"),
 		.bar0_prefetchable_hwtcl                  ("Enabled"),
@@ -1155,10 +1155,9 @@ module pcie_de_gen1_x8_ast128 (
 		.tl_cfg_ctl_wr        (1'b0),                                     //    (terminated)
 		.tl_cfg_sts_wr        (1'b0),                                     //    (terminated)
 		.cpl_err_func         (),                                         //    (terminated)
-		.pm_event_func        (),                                         //    (terminated)
-            // flash manager
-        .flash_address	(flash_address),
-        .nflash_ce0	(nflash_ce0),
+		.pm_event_func        (),
+		.flash_address	(flash_address),
+	   .nflash_ce0	(nflash_ce0),
 		.nflash_ce1	(nflash_ce1),
 		.nflash_we	(nflash_we),
 		.nflash_oe	(nflash_oe),

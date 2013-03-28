@@ -1,6 +1,9 @@
 -- Copyright (c) 2011-2014, Ailamazyan Program Systems Institute (Russian             
 -- Academy of Science). See COPYING in top-level directory.
 
+library altera_mf;
+use altera_mf.altera_mf_components.all;
+
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_arith.all;
@@ -8,7 +11,7 @@ use ieee.std_logic_unsigned.all;
 use ieee.std_logic_misc.all;
 
 use work.tlp_package.all;
-use work.fm_pkg.all;
+use work.config.all;
 
 -------------------------------------------------------------------------------
 -- Parameters
@@ -76,21 +79,21 @@ entity app_io is
         clk_in                : in  std_logic;
         rstn                  : in  std_logic;
 
-        -- flash interface
-        flash_address : inout std_logic_vector (ADDR_SZ - 1 downto 0);
-        nflash_ce0    : inout std_logic;
-        nflash_ce1    : inout std_logic;
-        nflash_we     : inout std_logic;
-        nflash_oe     : inout std_logic;
-        flash_data    : inout std_logic_vector (31 downto 0);
-        nflash_reset  : inout std_logic;
-        flash_clk     : inout std_logic;
-        flash_wait0   : in    std_logic;
-        flash_wait1   : in    std_logic;
-        nflash_adv    : inout std_logic);
+        ------------------------------------------
+
+        rx_data   : out std_logic_vector(DATA_WIDTH - 1 downto 0);
+        rx_dvalid : out std_logic;
+
+        rx_sop : out std_logic;
+        rx_eop : out std_logic;
+
+        tx_data   : in  std_logic_vector(DATA_WIDTH - 1 downto 0);
+        tx_dvalid : in  std_logic;
+        ej_ready  : out std_logic);
 end entity app_io;
 
 architecture app of app_io is
+
     signal reset : std_logic;
 
     signal tx_st_data  : std_logic_vector(127 downto 0);
@@ -136,33 +139,12 @@ architecture app of app_io is
     signal int_req        : std_logic;
     signal my_app_int_sts : std_logic;
 
-    ---------------------------------------------------------------------------
-
-    signal rx_data   : std_logic_vector(127 downto 0);
-    signal rx_dvalid : std_logic;
-    signal rx_sop    : std_logic;
-    signal rx_eop    : std_logic;
-    --
-    signal tx_data   : std_logic_vector(127 downto 0);
-    signal tx_dvalid : std_logic;
-    signal ej_ready  : std_logic;
-
-    ---------------------------------------------------------------------------
-
-    constant ARITY : positive := 1;     -- NB: flash is the only app
-    subtype  competitors_range is integer range 0 to ARITY-1;
-
-    signal rx_root    : tlp_rx;
-    signal rx_subs    : tlp_rx_array(competitors_range);
-    --
-    signal tx_root    : tlp_tx;
-    signal tx_root_bp : tlp_tx_backpressure;
-    signal tx_subs    : tlp_tx_array(competitors_range);
-    signal tx_subs_bp : tlp_tx_backpressure_array(competitors_range);
+    constant zeros64 : std_logic_vector(63 downto 0) := (others => '0');
+    
 begin
 
     -- Some sensible values for the unused outputs
-    ---------------------------------------------------------------------------
+
     msi_stream_data0  <= (others => '0');
     msi_stream_valid0 <= '0';
     aer_msi_num       <= (others => '0');
@@ -174,77 +156,7 @@ begin
     err_desc          <= (others => '0');
     pm_data           <= (others => '0');
 
-    -- TLP application
-    ---------------------------------------------------------------------------
-
-    (tx_data, tx_dvalid) <= tx_root;
-    rx_root              <= (rx_data, rx_dvalid, rx_sop, rx_eop);
-    tx_root_bp.ej_ready  <= ej_ready;
-
-    -- applications are the clients of TLP-switch
-    apps : block
-    begin
-        -- client #0
-        fm : entity work.flash_manager
-            port map (rx_data       => rx_subs(0).data,
-                      rx_dvalid     => rx_subs(0).dvalid,
-                      rx_sop        => rx_subs(0).sop,
-                      rx_eop        => rx_subs(0).eop,
-                      tx_data       => tx_subs(0).data,
-                      tx_dvalid     => tx_subs(0).dvalid,
-                      ej_ready      => tx_subs_bp(0).ej_ready,
-                      clk           => clk_in,
-                      reset         => reset,
-                      -- flash
-                      flash_address => flash_address,
-                      nflash_ce0    => nflash_ce0,
-                      nflash_ce1    => nflash_ce1,
-                      nflash_we     => nflash_we,
-                      nflash_oe     => nflash_oe,
-                      flash_data    => flash_data,
-                      nflash_reset  => nflash_reset,
-                      flash_clk     => flash_clk,
-                      flash_wait0   => flash_wait0,
-                      flash_wait1   => flash_wait1,
-                      nflash_adv    => nflash_adv);
-
-        -- NB: flash is the only app
-        -- client #1
-        --loopback : entity work.tlp_fifo_loopback
-        --    generic map (DATA_WIDTH => 128,
-        --                 APP_INDEX  => 1)
-        --    port map (rx_data   => rx_subs(1).data,
-        --              rx_dvalid => rx_subs(1).dvalid,
-        --              rx_sop    => rx_subs(1).sop,
-        --              rx_eop    => rx_subs(1).eop,
-        --              tx_data   => tx_subs(1).data,
-        --              tx_dvalid => tx_subs(1).dvalid,
-        --              ej_ready  => tx_subs_bp(1).ej_ready,
-        --              clk       => clk_in,
-        --              reset     => reset);
-    end block apps;
-
-    -- DMX part of TLP-switch
-    dmx : entity work.tlp_rx_dmx
-        generic map (ARITY => ARITY)
-        port map (root  => rx_root,
-                  subs  => rx_subs,
-                  --
-                  clk   => clk_in,
-                  reset => reset);
-
-    -- MUX part of TLP-switch
-    mux : entity work.tlp_tx_mux
-        generic map (ARITY => ARITY)
-        port map (root    => tx_root,
-                  root_bp => tx_root_bp,
-                  subs    => tx_subs,
-                  subs_bp => tx_subs_bp,
-                  --
-                  clk     => clk_in,
-                  reset   => reset);
-
-    ---------------------------------------------------------------------------
+    reset <= rstn;
 
     -- Injection: receive from PCI-E
     tlp_rx_128 : work.tlp_rx_128
@@ -302,7 +214,5 @@ begin
 
     app_int_sts <= '0';
     app_msi_req <= my_app_int_sts;
-
-    reset <= not rstn;
 
 end architecture app;

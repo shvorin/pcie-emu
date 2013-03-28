@@ -158,18 +158,19 @@ module altpcied_sv_hwtcl # (
       input [7 : 0]        tx_cred_hdrfccp,
       input [7 : 0]        tx_cred_hdrfcnp,
       input [7 : 0]        tx_cred_hdrfcp,
+		output [25 : 0]	flash_address,
+	   output				nflash_ce0,
+		output				nflash_ce1,
+		output 				nflash_we,
+		output 				nflash_oe,
+		inout [31 : 0]		flash_data,
+		output nflash_reset,
+		output flash_clk,
+		input flash_wait0,
+		input flash_wait1,
+		output nflash_adv
 
-	  output [25 : 0]	flash_address,
-	  output				nflash_ce0,
-	  output				nflash_ce1,
-	  output 				nflash_we,
-	  output 				nflash_oe,
-	  inout [31 : 0]		flash_data,
-	  output nflash_reset,
-	  output flash_clk,
-	  input flash_wait0,
-	  input flash_wait1,
-	  output nflash_adv);
+      );
 
       assign                derr_cor_ext_rcv_drv = derr_cor_ext_rcv;
       assign                derr_cor_ext_rpl_drv = derr_cor_ext_rpl;
@@ -468,6 +469,14 @@ wire [1:0]  tx_st_empty_int;
          assign tx_st_data_int                        = (ast_width_hwtcl=="Avalon-ST 128-bit")?{tx_stream_data0_1[63 : 0],tx_stream_data0[63 : 0]}: {64'h0,tx_stream_data0[63 : 0]} ;
          assign tx_st_data[port_width_data_hwtcl-1:0] = tx_st_data_int[port_width_data_hwtcl-1:0];
 
+         wire [127:0]     rx_data;
+         wire             rx_dvalid;
+         wire             rx_sop;
+         wire             rx_eop;
+         wire [127:0]     tx_data;
+         wire             tx_dvalid;
+         wire             ej_ready;
+
          app_io #
            (
             .AVALON_WADDR           (avalon_waddr_hwltcl),
@@ -478,7 +487,7 @@ wire [1:0]  tx_st_empty_int;
          app
            (
             .clk_in      (pld_clk),
-            .rstn        (app_rstn),
+            .rstn        (!app_rstn),
             .test_sim    (testin_zero),
 
             .aer_msi_num (aer_msi_num),
@@ -522,17 +531,40 @@ wire [1:0]  tx_st_empty_int;
             .tx_stream_ready0       (tx_st_ready),
             .tx_stream_valid0       (tx_st_valid[0]),
 
-			.flash_address 		(flash_address), 
-			.nflash_ce0			 (nflash_ce0), 
-			.nflash_ce1			 (nflash_ce1),
-			.nflash_we			 (nflash_we), 
-			.nflash_oe			 (nflash_oe), 
-			.flash_data			 (flash_data),
-			.nflash_reset		 (nflash_reset),
-			.flash_clk			 (flash_clk),
-			.flash_wait0		 (flash_wait0),
-			.flash_wait1   	 (flash_wait1),
-			.nflash_adv			 (nflash_adv));
+            ////
+            .rx_data                (rx_data),
+            .rx_dvalid              (rx_dvalid),
+	        .rx_sop                 (rx_sop),
+	        .rx_eop                 (rx_eop),
+	        .tx_data                (tx_data),
+	        .tx_dvalid              (tx_dvalid),
+	        .ej_ready               (ej_ready));
+
+         flash_manager fm
+			  (
+				.rx_data 			 (rx_data), 
+				.rx_dvalid			 (rx_dvalid),
+				.rx_sop				 (rx_sop),
+				.rx_eop				 (rx_eop),
+				.tx_data				 (tx_data),
+				.tx_dvalid			 (tx_dvalid),
+				.ej_ready			 (ej_ready),
+				.clk 					 (pld_clk),
+				.reset				 (!app_rstn),
+				//.pfl_flash_acc_req  (1'b0), 
+				//pfl_flash_acc_grnt
+				.flash_address 		(flash_address), 
+				.nflash_ce0			 (nflash_ce0), 
+				.nflash_ce1			 (nflash_ce1),
+				.nflash_we			 (nflash_we), 
+				.nflash_oe			 (nflash_oe), 
+				.flash_data			 (flash_data),
+				.nflash_reset		 (nflash_reset),
+				.flash_clk			 (flash_clk),
+				.flash_wait0		 (flash_wait0),
+				.flash_wait1   	 (flash_wait1),
+				.nflash_adv			 (nflash_adv)
+				);
    end
 end
 endgenerate
