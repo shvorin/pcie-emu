@@ -57,18 +57,18 @@ entity flash_manager is
 		--pfl_flash_acc_req	: in STD_LOGIC;
 		--pfl_flash_acc_grnt	: out STD_LOGIC;
 			
-		-- flash interface
-		flash_address 		: inout STD_LOGIC_VECTOR (ADDR_SZ - 1 downto 0);
-		nflash_ce0			: inout STD_LOGIC;
-		nflash_ce1			: inout STD_LOGIC;
-		nflash_we			: inout STD_LOGIC;
-		nflash_oe			: inout STD_LOGIC;
-		flash_data			: inout STD_LOGIC_VECTOR (31 downto 0);	
-		nflash_reset		: inout STD_LOGIC;
-		flash_clk			: inout STD_LOGIC;
-		flash_wait0			: in STD_LOGIC;
-		flash_wait1			: in STD_LOGIC;
-		nflash_adv			: inout STD_LOGIC
+        -- flash interface
+        flash_address : out   std_logic_vector (ADDR_SZ - 1 downto 0);
+        nflash_ce0    : out   std_logic;
+        nflash_ce1    : out   std_logic;
+        nflash_we     : out   std_logic;
+        nflash_oe     : out   std_logic;
+        flash_data    : inout std_logic_vector (31 downto 0);
+        nflash_reset  : out   std_logic;
+        flash_clk     : out   std_logic;
+        flash_wait0   : in    std_logic;
+        flash_wait1   : in    std_logic;
+        nflash_adv    : out   std_logic
 	);
 end entity;
 
@@ -101,37 +101,6 @@ architecture flash_manager_arch of flash_manager is
 			tx_data     		: out std_logic_vector(127 downto 0);
 			tx_dvalid   		: out std_logic;
 			ej_ready    		: in std_logic
-		);
-	end component;
-	
-	component flash_controller is
-		port (
-			clk					: in STD_LOGIC;
-			reset					: in STD_LOGIC;
-				
-			deny_req				: in STD_LOGIC;
-			deny_ack				: out STD_LOGIC;
-	
-			read_data 			: out STD_LOGIC_VECTOR (31 downto 0);
-			rddata_rdy			: out STD_LOGIC;
-			
-			fifo_data			: in STD_LOGIC_VECTOR (FIFO_DATA_SZ - 1 downto 0);
-			fifo_empty			: in STD_LOGIC;
-			fifo_rdreq			: out STD_LOGIC;
-			
-			test_sig 		: out STD_LOGIC;
-			
-			flash_address 		: inout STD_LOGIC_VECTOR (ADDR_SZ - 1 downto 0);
-			nflash_ce0			: inout STD_LOGIC;
-			nflash_ce1			: inout STD_LOGIC;
-			nflash_we			: inout STD_LOGIC;
-			nflash_oe			: inout STD_LOGIC;
-			flash_data			: inout STD_LOGIC_VECTOR (31 downto 0);	
-			nflash_reset		: inout STD_LOGIC;
-			flash_clk			: inout STD_LOGIC;
-			flash_wait0 		: in STD_LOGIC;
-			flash_wait1			: in STD_LOGIC;
-			nflash_adv			: inout STD_LOGIC
 		);
 	end component;
 	
@@ -1329,7 +1298,7 @@ REGS : flash_manager_regs port map (
 );
 
 
-flash_cntl : flash_controller port map (
+flash_cntl : entity work.flash_controller port map (
 	clk				=> clk,
 	reset			=> reset,
 	deny_req		=> deny_req,

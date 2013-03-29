@@ -28,17 +28,17 @@ entity top is
 		hip_serial_tx_out6        : out std_logic;                                        -- tx_out6
 		hip_serial_tx_out7        : out std_logic;
 
-		flash_address 		 			: inout STD_LOGIC_VECTOR (25 downto 0);
-		nflash_ce0				 		: inout STD_LOGIC;
-		nflash_ce1				 		: inout STD_LOGIC;
-		nflash_we				 		: inout STD_LOGIC;
-		nflash_oe				 		: inout STD_LOGIC;
-		flash_data			 			: inout STD_LOGIC_VECTOR (31 downto 0);
-		nflash_reset					: inout STD_LOGIC;
-		flash_clk						: inout STD_LOGIC;
-		flash_wait0						: in STD_LOGIC;
-		flash_wait1						: in STD_LOGIC;
-		nflash_adv						: inout STD_LOGIC
+        flash_address : out   std_logic_vector (25 downto 0);
+        nflash_ce0    : out   std_logic;
+        nflash_ce1    : out   std_logic;
+        nflash_we     : out   std_logic;
+        nflash_oe     : out   std_logic;
+        flash_data    : inout std_logic_vector (31 downto 0);
+        nflash_reset  : out   std_logic;
+        flash_clk     : out   std_logic;
+        flash_wait0   : in    std_logic;
+        flash_wait1   : in    std_logic;
+        nflash_adv    : out   std_logic
 	);
 end entity;
 	
@@ -208,17 +208,17 @@ architecture top_arch of top is
 			clk_clk                   : in  std_logic                     := 'X';             -- clk
 			reset_reset_n             : in  std_logic                     := 'X';              -- reset_n
 			
-			flash_address 		 			: inout STD_LOGIC_VECTOR (25 downto 0);
-			nflash_ce0				 		: inout STD_LOGIC;
-			nflash_ce1				 		: inout STD_LOGIC;
-			nflash_we				 		: inout STD_LOGIC;
-			nflash_oe				 		: inout STD_LOGIC;
-			flash_data			 			: inout STD_LOGIC_VECTOR (31 downto 0);
-			nflash_reset					: inout STD_LOGIC;
-			flash_clk						: inout STD_LOGIC;
-			flash_wait0						: in STD_LOGIC;
-			flash_wait1						: in STD_LOGIC;
-			nflash_adv						: inout STD_LOGIC
+            flash_address : out   std_logic_vector (25 downto 0);
+            nflash_ce0    : out   std_logic;
+            nflash_ce1    : out   std_logic;
+            nflash_we     : out   std_logic;
+            nflash_oe     : out   std_logic;
+            flash_data    : inout std_logic_vector (31 downto 0);
+            nflash_reset  : out   std_logic;
+            flash_clk     : out   std_logic;
+            flash_wait0   : in    std_logic;
+            flash_wait1   : in    std_logic;
+            nflash_adv    : out   std_logic
 		);
 	end component;
 

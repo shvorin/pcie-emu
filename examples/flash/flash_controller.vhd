@@ -56,18 +56,17 @@ entity flash_controller is
 		
 		test_sig 		: out STD_LOGIC;
 		-- Flash interface
-		flash_address 		: inout STD_LOGIC_VECTOR (ADDR_SZ - 1 downto 0);
-		nflash_ce0			: inout STD_LOGIC;
-		nflash_ce1			: inout STD_LOGIC;
-		nflash_we			: inout STD_LOGIC;
-		nflash_oe			: inout STD_LOGIC;
-		flash_data			: inout STD_LOGIC_VECTOR (31 downto 0);	
-		nflash_reset		: inout STD_LOGIC;
-		flash_clk			: inout STD_LOGIC;
-		flash_wait0			: in STD_LOGIC;
-		flash_wait1			: in STD_LOGIC;
-		nflash_adv			: inout STD_LOGIC
-		
+        flash_address : out   std_logic_vector (ADDR_SZ - 1 downto 0);
+        nflash_ce0    : out   std_logic;
+        nflash_ce1    : out   std_logic;
+        nflash_we     : out   std_logic;
+        nflash_oe     : out   std_logic;
+        flash_data    : inout std_logic_vector (31 downto 0);
+        nflash_reset  : out   std_logic;
+        flash_clk     : out   std_logic;
+        flash_wait0   : in    std_logic;
+        flash_wait1   : in    std_logic;
+        nflash_adv    : out   std_logic
 	);
 end entity;
 
