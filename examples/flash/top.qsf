@@ -293,6 +293,10 @@ set_global_assignment -name VHDL_FILE app/sync_fifo_control.vhd
 set_global_assignment -name VHDL_FILE app/ram_dp.vhd
 set_global_assignment -name VHDL_FILE app/ram_sdp.vhd
 set_global_assignment -name VHDL_FILE app/counter.vhd
+set_global_assignment -name VHDL_FILE app/tlp_rx_dmx.vhd
+set_global_assignment -name VHDL_FILE app/tlp_tx_mux.vhd
+set_global_assignment -name VHDL_FILE app/arbiter.vhd
+set_global_assignment -name VHDL_FILE app/msg_arbiter_client.vhd
 set_global_assignment -name VHDL_FILE flash_manager.vhd
 set_global_assignment -name VHDL_FILE flash_controller.vhd
 set_global_assignment -name VHDL_FILE flash_manager_regs.vhd
