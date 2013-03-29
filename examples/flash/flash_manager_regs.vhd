@@ -9,6 +9,7 @@ use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 use work.fm_pkg.all;
 use work.tlp_package.all;
+use work.util.all;
 
 entity flash_manager_regs is
 	port (
@@ -165,8 +166,7 @@ begin
 	tx_data <= mk_cpl_packet (read_reg, MY_PCI_ID) when (tx_cur_state = send_hdr)
 				else	x"0000000000000000" & reg;
 	
-	tx_dvalid <= 	'1' when ((tx_cur_state = send_hdr) or (tx_cur_state = send_reg))
-			else	'0';
+	tx_dvalid <= to_stdl(tx_cur_state /= idle);
 							
 	--------------------------------
 	-- Flash manager register
