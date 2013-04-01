@@ -63,7 +63,8 @@ begin
                 allow => sel(i));
 
         ej_ready(i)         <= sel(i) and root_bp.ej_ready;
-        subs_bp(i).ej_ready <= ej_ready(i);
+        -- FIXME: stub
+        -- subs_bp(i).ej_ready <= ej_ready(i);
 
         markup : entity work.tlp_markup
             port map (
@@ -100,5 +101,8 @@ begin
         end if;
     end process;
 
-    root <= fmux(sel, subs);
+    -- FIXME: stub
+    --root <= fmux(sel, subs);
+    root <= subs(0);
+    subs_bp <= (0 => (ej_ready => '1'), others => (ej_ready => '1'));
 end architecture tlp_tx_mux;
