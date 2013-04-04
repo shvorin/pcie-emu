@@ -58,13 +58,42 @@ begin
     end generate;
 
     -- DMX part of TLP-switch
-    dmx : entity work.tlp_rx_dmx
-        generic map (ARITY => ARITY)
-        port map (root  => rx_root,
-                  subs  => rx_subs,
-                  --
-                  clk   => clk,
-                  reset => reset);
+    dmx : block
+        subtype competitors_range is integer range 0 to ARITY-1;
+        subtype competitors_t is std_logic_vector(competitors_range);
+
+        function sel(header : qqword) return competitors_t is
+            constant info : tlp_info    := header_info(header);
+            constant addr : tlp_address := parse(header(127 downto 64), info.is_4dw);
+
+            variable result : competitors_t := (others => '0');
+        begin
+            case info.kind is
+                when kind_MRd32 | kind_MRd64 | kind_MWr32 | kind_MWr64 =>
+                    for i in competitors_t'range loop
+                        -- ad hoc target choice
+                        if conv_integer(addr(11 downto 8)) = i then
+                            result(i) := '1';
+                            return result;
+                        end if;
+                    end loop;
+                    
+                when others => null;
+            end case;
+
+            return (0 => '1', others => '0');  -- default target is 0-th
+        end;
+
+    begin
+        dmx : entity work.tlp_rx_dmx
+            generic map (ARITY => ARITY)
+            port map (root  => rx_root,
+                      subs  => rx_subs,
+                      sel   => sel(rx_root.data),
+                      --
+                      clk   => clk,
+                      reset => reset);
+    end block dmx;
 
     -- MUX part of TLP-switch
     mux : entity work.tlp_tx_mux
