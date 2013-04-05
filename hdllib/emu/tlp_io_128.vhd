@@ -27,7 +27,7 @@ begin
     tx_root_bp.ej_ready  <= ej_ready;
 
     -- applications are the clients of TLP-switch
-    apps : tlp_apps_c -- entity work.tlp_apps_e(loopback_apps)
+    apps : tlp_apps_c
         generic map (ARITY => ARITY)
         port map (
             rx_subs    => rx_subs,
