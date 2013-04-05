@@ -61,7 +61,7 @@ begin
         generic map (period)
         port map (clk, reset);
 
-    app : configuration work.emu_conf
+    app : tlp_io_128c
         port map (
             clk   => clk,
             reset => reset,
