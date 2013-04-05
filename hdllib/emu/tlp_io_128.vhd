@@ -21,13 +21,28 @@ architecture tlp_io_128 of tlp_io_128e is
     signal tx_subs    : tlp_tx_array(competitors_range);
     signal tx_subs_bp : tlp_tx_backpressure_array(competitors_range);
 
+    component tlp_switch is
+        generic (ARITY : positive);
+        port (
+            rx_root    : in  tlp_rx;
+            rx_subs    : out tlp_rx_array(0 to ARITY-1);
+            --
+            tx_root    : out tlp_tx;
+            tx_root_bp : in  tlp_tx_backpressure;
+            tx_subs    : in  tlp_tx_array(0 to ARITY-1);
+            tx_subs_bp : out tlp_tx_backpressure_array(0 to ARITY-1);
+            --
+            clk        : in  std_logic;
+            reset      : in  std_logic);
+    end component;
+
 begin
     (tx_data, tx_dvalid) <= tx_root;
     rx_root              <= (rx_data, rx_dvalid, rx_sop, rx_eop);
     tx_root_bp.ej_ready  <= ej_ready;
 
     -- applications are the clients of TLP-switch
-    apps : tlp_apps_c
+    apps : tlp_apps_c                   -- configurable
         generic map (ARITY => ARITY)
         port map (
             rx_subs    => rx_subs,
@@ -38,23 +53,20 @@ begin
             clk        => clk,
             reset      => reset);
 
-    -- DMX part of TLP-switch
-    dmx : tlp_rx_dmx_c
-        generic map (ARITY => ARITY)
-        port map (root  => rx_root,
-                  subs  => rx_subs,
-                  --
-                  clk   => clk,
-                  reset => reset);
+    -- TLP-switch
+    switch : tlp_switch                 -- configurable
+        generic map (
+            ARITY => ARITY)
+        port map (
+            rx_root    => rx_root,
+            rx_subs    => rx_subs,
+            --
+            tx_root    => tx_root,
+            tx_root_bp => tx_root_bp,
+            tx_subs    => tx_subs,
+            tx_subs_bp => tx_subs_bp,
+            --
+            clk        => clk,
+            reset      => reset);
 
-    -- MUX part of TLP-switch
-    mux : entity work.tlp_tx_mux
-        generic map (ARITY => ARITY)
-        port map (root    => tx_root,
-                  root_bp => tx_root_bp,
-                  subs    => tx_subs,
-                  subs_bp => tx_subs_bp,
-                  --
-                  clk     => clk,
-                  reset   => reset);
 end architecture tlp_io_128;
