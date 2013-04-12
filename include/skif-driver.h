@@ -31,6 +31,7 @@
 typedef struct BARDesc_t {
 	uint8_t dev_num;
 	uint8_t bar_num;
+	uint8_t write_combining;
 	size_t length;
 } BARDesc;
 

@@ -6,10 +6,10 @@
 #ifndef DEVSKIF_H
 #define DEVSKIF_H
 
+#include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <errno.h>
 #include <fcntl.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -75,12 +75,12 @@ extern "C" {
 #endif /* not UNSAFE_FPGA_MEMOPS */
 #endif /* not EMU */
 
-static size_t DEVSKIF_Page_Align_Up (size_t size) {
+static __attribute__((unused)) size_t DEVSKIF_Page_Align_Up (size_t size) {
     size_t page_size = sysconf(_SC_PAGE_SIZE);
     return (size + page_size - 1) & (~(page_size - 1));
 }
 
-static size_t DEVSKIF_Page_Align_Down (size_t size) {
+static __attribute__((unused)) size_t DEVSKIF_Page_Align_Down (size_t size) {
     size_t page_size = sysconf(_SC_PAGE_SIZE);
     return size & (~(page_size - 1));
 }
@@ -145,7 +145,7 @@ static void __devskif_munmap (DEVSKIF * devskif) {
     mock_munmap(devskif->pa_address, devskif->pa_length);
 }
 
-static ssize_t DEVSKIF_BAR_Length (uint8_t dev_num, uint8_t bar_num) {
+static __attribute__((unused)) ssize_t DEVSKIF_BAR_Length (uint8_t dev_num, uint8_t bar_num) {
     int fd = __devskif_open("admin", PROT_READ);
     if (fd == -1)
         return -1;
@@ -154,11 +154,11 @@ static ssize_t DEVSKIF_BAR_Length (uint8_t dev_num, uint8_t bar_num) {
     return length;
 }
 
-static ssize_t DEVSKIF_MEM_Length (uint8_t mem_num) {
+static __attribute__((unused)) ssize_t DEVSKIF_MEM_Length (uint8_t mem_num) {
     return DEVSKIF_BAR_Length(SKIF_DRIVER_DEV_MEM, mem_num);
 }
 
-static void * DEVSKIF_BAR_Init (DEVSKIF * devskif, uint8_t dev_num, uint8_t bar_num, off_t off, size_t len) {
+static __attribute__((unused)) void * DEVSKIF_BAR_Init (DEVSKIF * devskif, uint8_t dev_num, uint8_t bar_num, off_t off, size_t len) {
     devskif->fd = __devskif_open("admin", PROT_READ | PROT_WRITE);
     if (devskif->fd == -1)
         return DEVSKIF_FAILED;
@@ -171,20 +171,21 @@ static void * DEVSKIF_BAR_Init (DEVSKIF * devskif, uint8_t dev_num, uint8_t bar_
     return DEVSKIF_FAILED;
 }
 
-static void * DEVSKIF_MEM_Init (DEVSKIF * devskif, uint8_t mem_num, off_t off, size_t len) {
+static __attribute__((unused)) void * DEVSKIF_MEM_Init (DEVSKIF * devskif, uint8_t mem_num, off_t off, size_t len) {
     return DEVSKIF_BAR_Init(devskif, SKIF_DRIVER_DEV_MEM, mem_num, off, len);
 }
 
-static void * DEVSKIF_BAR_Entire_Init (DEVSKIF * devskif, uint8_t dev_num, uint8_t bar_num, size_t * len) {
+static __attribute__((unused)) void * DEVSKIF_BAR_Entire_Init (DEVSKIF * devskif, uint8_t dev_num, uint8_t bar_num, size_t * len) {
+    ssize_t length; void * res;
     devskif->fd = __devskif_open("admin", PROT_READ | PROT_WRITE);
     if (devskif->fd == -1)
         return DEVSKIF_FAILED;
-    ssize_t length = __devskif_get_bar_length(devskif->fd, dev_num, bar_num);
+    length = __devskif_get_bar_length(devskif->fd, dev_num, bar_num);
     if (length == -1)
         goto error;
     if (len != 0)
         *len = length;
-    void * res = __devskif_mmap(devskif, SKIF_DRIVER_MMAPARG(dev_num, bar_num, 0), length, PROT_READ | PROT_WRITE);
+    res = __devskif_mmap(devskif, SKIF_DRIVER_MMAPARG(dev_num, bar_num, 0), length, PROT_READ | PROT_WRITE);
     if (res == DEVSKIF_FAILED)
         goto error;
     return res;
@@ -193,21 +194,22 @@ static void * DEVSKIF_BAR_Entire_Init (DEVSKIF * devskif, uint8_t dev_num, uint8
     return DEVSKIF_FAILED;
 }
 
-static void * DEVSKIF_MEM_Entire_Init (DEVSKIF * devskif, uint8_t mem_num, size_t * len) {
+static __attribute__((unused)) void * DEVSKIF_MEM_Entire_Init (DEVSKIF * devskif, uint8_t mem_num, size_t * len) {
     return DEVSKIF_BAR_Entire_Init(devskif, SKIF_DRIVER_DEV_MEM, mem_num, len);
 }
 
 // prot - PROT_READ or PROT_WRITE or both
-static void * DEVSKIF_Init (DEVSKIF * devskif, const char * name, int prot, size_t * len) {
+static __attribute__((unused)) void * DEVSKIF_Init (DEVSKIF * devskif, const char * name, int prot, size_t * len) {
+    ssize_t length; void * res;
     devskif->fd = __devskif_open(name, prot);
     if (devskif->fd == -1)
         return DEVSKIF_FAILED;
-    ssize_t length = __devskif_get_length(devskif->fd);
+    length = __devskif_get_length(devskif->fd);
     if (length == -1)
         goto error;
     if (len != 0)
         *len = length;
-    void * res = __devskif_mmap(devskif, 0, length, prot);
+    res = __devskif_mmap(devskif, 0, length, prot);
     if (res == DEVSKIF_FAILED)
         goto error;
     return res;
@@ -216,7 +218,7 @@ static void * DEVSKIF_Init (DEVSKIF * devskif, const char * name, int prot, size
     return DEVSKIF_FAILED;
 }
 
-static void DEVSKIF_Finalise (DEVSKIF * devskif) {
+static __attribute__((unused)) void DEVSKIF_Finalise (DEVSKIF * devskif) {
     __devskif_munmap(devskif);
     __devskif_close(devskif->fd);
 }

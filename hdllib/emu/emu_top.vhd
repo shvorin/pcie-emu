@@ -61,7 +61,7 @@ begin
         generic map (period)
         port map (clk, reset);
 
-    app : tlp_io_128
+    app : tlp_io
         port map (
             clk   => clk,
             reset => reset,
