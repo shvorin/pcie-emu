@@ -7,7 +7,6 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_arith.all;
 use ieee.std_logic_unsigned.all;
-use std.textio.all;
 
 use work.util.all;
 use work.tlp_package.all;
@@ -57,10 +56,9 @@ architecture emu_top of emu_top is
     -- About linking with foreign functions see
     -- http://ghdl.free.fr/ghdl/Restrictions-on-foreign-declarations.html
 
-    procedure line_up(tx_dvalid          : std_logic;
-                      dw0, dw1, dw2, dw3 : integer;
-                      ej_ready           : std_logic;
-                      arr                : foreign_tlp256_data_t)
+    procedure line_up(tx_dvalid       : std_logic;
+                      ej_ready        : std_logic;
+                      foreign_tx_data : foreign_tlp256_data_t)
     is
     begin
         assert false severity failure;
@@ -71,20 +69,17 @@ architecture emu_top of emu_top is
     -- NB: corresponding C prototype is: void line_down(struct scalar_params *, uint32_t arr[8])
     procedure line_down(
         -- scalar parameters
-        rx_dvalid          : out std_logic;
-        dw0, dw1, dw2, dw3 : out integer;
-        rx_sop, rx_eop     : out std_logic;
-        ej_ready           : out std_logic;
+        rx_dvalid       : out std_logic;
+        rx_sop, rx_eop  : out std_logic;
+        ej_ready        : out std_logic;
         -- composite parameter(s)
-        arr                : out foreign_tlp256_data_t)
+        foreign_rx_data : out foreign_tlp256_data_t)
     is
     begin
         assert false severity failure;
     end;
 
     attribute foreign of line_down : procedure is "VHPIDIRECT line_down";
-
-    constant zeros64 : std_logic_vector(63 downto 0) := (others => '0');
 
 begin
     cg : entity work.clock_gen
@@ -109,10 +104,7 @@ begin
 
     data_down : process (clk, reset)
         variable v_rx_dvalid, v_rx_sop, v_rx_eop, v_ej_ready : std_logic;
-        variable v_data3, v_data2, v_data1, v_data0          : integer;
-        variable arr                                         : foreign_tlp256_data_t;
-        variable x, y                                        : integer;
-        variable l                                           : line;
+        variable foreign_rx_data                             : foreign_tlp256_data_t;
     begin
         if reset = '1' then
             rx_data   <= (others => '0');
@@ -122,18 +114,8 @@ begin
             ej_ready  <= '0';
 
         elsif rising_edge(clk) then
-            line_down(v_rx_dvalid, v_data0, v_data1, v_data2, v_data3, v_rx_sop, v_rx_eop, v_ej_ready, arr);
-            rx_data <= conv_std_logic_vector(v_data3, 32) &
-                       conv_std_logic_vector(v_data2, 32) &
-                       conv_std_logic_vector(v_data1, 32) &
-                       conv_std_logic_vector(v_data0, 32) & zeros64 & zeros64;  --
-            -- FIXME
-            --line_test(x, arr, y);
-            write(l, arr(0));
-            write(l, ' ');
-            write(l, arr(7));
-            writeline(output, l);
-
+            line_down(v_rx_dvalid, v_rx_sop, v_rx_eop, v_ej_ready, foreign_rx_data);
+            rx_data   <= unwrap(foreign_rx_data);
             rx_dvalid <= v_rx_dvalid;
             rx_sop    <= v_rx_sop;
             rx_eop    <= v_rx_eop;
@@ -146,10 +128,6 @@ begin
         if rising_edge(clk) then
             -- NB: also looping back ej_ready 
             line_up(tx_dvalid,
-                    conv_integer(tx_data(31 downto 0)),
-                    conv_integer(tx_data(63 downto 32)),
-                    conv_integer(tx_data(95 downto 64)),
-                    conv_integer(tx_data(127 downto 96)),
                     ej_ready,
                     wrap(tx_data));
             null;
