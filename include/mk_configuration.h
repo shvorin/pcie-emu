@@ -36,7 +36,7 @@ static uint64_t pack_triple(triple_t triple) {
 
     struct {
       unsigned x : 8, y : 8, z : 8;
-      long : 40;
+      uint64_t : 40;
     } sval;
   } u = {.sval = {triple.x, triple.y, triple.z}};
 
@@ -53,7 +53,7 @@ static triple_t unpack_triple(uint64_t v) {
 
     struct {
       unsigned x : 8, y : 8, z : 8;
-      long : 40;
+      uint64_t : 40;
     } sval;
   } u = {.ival = v};
 
