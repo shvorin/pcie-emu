@@ -56,18 +56,18 @@ architecture emu_top256 of emu_top256 is
     -- About linking with foreign functions see
     -- http://ghdl.free.fr/ghdl/Restrictions-on-foreign-declarations.html
 
-    procedure line_up(tx_dvalid       : std_logic;
-                      ej_ready        : std_logic;
-                      foreign_tx_data : foreign_tlp256_data_t)
+    procedure line256_up(tx_dvalid       : std_logic;
+                         ej_ready        : std_logic;
+                         foreign_tx_data : foreign_tlp256_data_t)
     is
     begin
         assert false severity failure;
     end;
 
-    attribute foreign of line_up : procedure is "VHPIDIRECT line_up";
+    attribute foreign of line256_up : procedure is "VHPIDIRECT line256_up";
 
-    -- NB: corresponding C prototype is: void line_down(struct scalar_params *, uint32_t arr[8])
-    procedure line_down(
+    -- NB: corresponding C prototype is: void line256_down(struct scalar_params *, uint32_t arr[8])
+    procedure line256_down(
         -- scalar parameters
         rx_dvalid       : out std_logic;
         rx_sop, rx_eop  : out std_logic;
@@ -79,7 +79,7 @@ architecture emu_top256 of emu_top256 is
         assert false severity failure;
     end;
 
-    attribute foreign of line_down : procedure is "VHPIDIRECT line_down";
+    attribute foreign of line256_down : procedure is "VHPIDIRECT line256_down";
 
 begin
     cg : entity work.clock_gen
@@ -114,7 +114,7 @@ begin
             ej_ready  <= '0';
 
         elsif rising_edge(clk) then
-            line_down(v_rx_dvalid, v_rx_sop, v_rx_eop, v_ej_ready, foreign_rx_data);
+            line256_down(v_rx_dvalid, v_rx_sop, v_rx_eop, v_ej_ready, foreign_rx_data);
             rx_data   <= unwrap(foreign_rx_data);
             rx_dvalid <= v_rx_dvalid;
             rx_sop    <= v_rx_sop;
@@ -127,10 +127,7 @@ begin
     begin
         if rising_edge(clk) then
             -- NB: also looping back ej_ready 
-            line_up(tx_dvalid,
-                    ej_ready,
-                    wrap(tx_data));
-            null;
+            line256_up(tx_dvalid, ej_ready, wrap(tx_data));
         end if;
     end process;
     
