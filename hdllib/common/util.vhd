@@ -54,6 +54,7 @@ package util is
 
     function singleton(arg : std_logic) return std_logic_vector;
 
+    function align2_down(v : std_logic_vector) return std_logic_vector;
     function align8_down(v : std_logic_vector) return std_logic_vector;
     function align8_up(v   : std_logic_vector) return std_logic_vector;
 end util;
@@ -249,6 +250,11 @@ package body util is
     function align8_down(v : std_logic_vector) return std_logic_vector is
     begin
         return v(v'high downto v'low + 3) & "000";
+    end;
+
+    function align2_down(v : std_logic_vector) return std_logic_vector is
+    begin
+        return v(v'high downto v'low + 1) & "0";
     end;
 
     function align8_up(v : std_logic_vector) return std_logic_vector is
