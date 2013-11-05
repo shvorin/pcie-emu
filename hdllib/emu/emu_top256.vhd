@@ -57,7 +57,6 @@ architecture emu_top256 of emu_top256 is
     -- http://ghdl.free.fr/ghdl/Restrictions-on-foreign-declarations.html
 
     procedure line256_up(tx_dvalid       : std_logic;
-                         ej_ready        : std_logic;
                          foreign_tx_data : foreign_tlp256_data_t)
     is
     begin
@@ -126,8 +125,7 @@ begin
     data_up : process (clk)
     begin
         if rising_edge(clk) then
-            -- NB: also looping back ej_ready 
-            line256_up(tx_dvalid, ej_ready, wrap(tx_data));
+            line256_up(tx_dvalid, wrap(tx_data));
         end if;
     end process;
     
