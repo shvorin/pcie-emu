@@ -75,13 +75,13 @@ extern "C" {
 #endif /* not UNSAFE_FPGA_MEMOPS */
 #endif /* not EMU */
 
-static __attribute__((unused)) size_t DEVSKIF_Page_Align_Up (size_t size) {
-    size_t page_size = sysconf(_SC_PAGE_SIZE);
+static __attribute__((unused)) off_t DEVSKIF_Page_Align_Up (off_t size) {
+    off_t page_size = sysconf(_SC_PAGE_SIZE);
     return (size + page_size - 1) & (~(page_size - 1));
 }
 
-static __attribute__((unused)) size_t DEVSKIF_Page_Align_Down (size_t size) {
-    size_t page_size = sysconf(_SC_PAGE_SIZE);
+static __attribute__((unused)) off_t DEVSKIF_Page_Align_Down (off_t size) {
+    off_t page_size = sysconf(_SC_PAGE_SIZE);
     return size & (~(page_size - 1));
 }
 
@@ -130,7 +130,7 @@ static ssize_t __devskif_get_length (int fd) {
 
 static void * __devskif_mmap (DEVSKIF * devskif, off_t mmaparg, size_t len, int prot) {
     off_t pa_mmaparg = DEVSKIF_Page_Align_Down(mmaparg);
-    devskif->pa_length = len + (mmaparg - pa_mmaparg);
+    devskif->pa_length = (mmaparg - pa_mmaparg) + len;
     //fprintf(stderr, "devskif.h: mmap: mmaparg: 0x%lX, length: 0x%lX\n", mmaparg, len);
     //fprintf(stderr, "devskif.h: mmap: pa_mmaparg: 0x%lX, pa_length: 0x%lX\n", pa_mmaparg, devskif->pa_length);
     devskif->pa_address = mock_mmap(NULL, devskif->pa_length, prot & (PROT_READ | PROT_WRITE), MAP_SHARED, devskif->fd, pa_mmaparg);
