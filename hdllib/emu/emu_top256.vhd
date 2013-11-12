@@ -24,6 +24,7 @@ architecture emu_top256 of emu_top256 is
 
     signal ast_rx, ast_tx : ast;
     signal ast_tx_bp      : ast_bp;
+    signal rx_st_bardec   : std_logic_vector(7 downto 0);
 
     -- data representation for foreing calls
     type foreign_tlp256_data_t is array (integer range 0 to 7) of integer;
@@ -77,7 +78,10 @@ architecture emu_top256 of emu_top256 is
 
     attribute foreign of line256_up : procedure is "VHPIDIRECT line256_up";
 
-    procedure line256_down(foreign_ast_rx : out foreign_ast;
+    -- NB: corresponding C prototype is:
+    -- void line256_down(struct scalar_params *, ast256_t *ast, ast_bp_t *ast_bp)
+    procedure line256_down(bar_num        : out integer;
+                           foreign_ast_rx : out foreign_ast;
                            ast_tx_bp      : out ast_bp)
     is
     begin
@@ -91,27 +95,42 @@ begin
         generic map (period)
         port map (clk, reset);
 
-    app : ast_io
+    app : ast_ext_io
         port map (
             clk   => clk,
             reset => reset,
 
-            rx    => ast_rx,
-            tx    => ast_tx,
-            tx_bp => ast_tx_bp);
+            rx           => ast_rx,
+            tx           => ast_tx,
+            tx_bp        => ast_tx_bp,
+            rx_st_bardec => rx_st_bardec);
 
     data_down : process (clk, reset)
+        variable v_bar_num      : integer;
         variable foreign_ast_rx : foreign_ast;
         variable v_ast_tx_bp    : ast_bp;
+
+        function decode(bar_num : integer) return std_logic_vector is
+            variable result: std_logic_vector(7 downto 0) := (others => '0');
+        begin
+            for i in result'range loop
+                if bar_num = i then
+                    result(i) := '1';
+                end if;
+            end loop;
+
+            return result;
+        end;
     begin
         if reset = '1' then
             ast_rx    <= nothing;
             ast_tx_bp <= (ready => '0');
         elsif rising_edge(clk) then
-            line256_down(foreign_ast_rx, v_ast_tx_bp);
+            line256_down(v_bar_num, foreign_ast_rx, v_ast_tx_bp);
 
-            ast_rx    <= unwrap(foreign_ast_rx);
-            ast_tx_bp <= v_ast_tx_bp;
+            ast_rx       <= unwrap(foreign_ast_rx);
+            ast_tx_bp    <= v_ast_tx_bp;
+            rx_st_bardec <= decode(v_bar_num);
         end if;
     end process;
 
