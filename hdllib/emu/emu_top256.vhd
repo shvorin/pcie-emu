@@ -11,6 +11,7 @@ use ieee.std_logic_unsigned.all;
 use work.util.all;
 use work.tlp_package.all;
 use work.tlp256;
+use work.ast256.all;
 
 entity emu_top256 is
 end emu_top256;
@@ -80,26 +81,28 @@ architecture emu_top256 of emu_top256 is
 
     attribute foreign of line256_down : procedure is "VHPIDIRECT line256_down";
 
+    signal ast_rx, ast_tx : ast;
+    signal ast_tx_bp      : ast_bp;
+
 begin
     cg : entity work.clock_gen
         generic map (period)
         port map (clk, reset);
 
-    app : tlp256.io
+    app : ast_io
         port map (
             clk   => clk,
             reset => reset,
 
-            -- rx
-            rx_data   => rx_data,
-            rx_dvalid => rx_dvalid,
-            rx_sop    => rx_sop,
-            rx_eop    => rx_eop,
+            rx    => ast_rx,
+            tx    => ast_tx,
+            tx_bp => ast_tx_bp);
 
-            -- tx
-            tx_data   => tx_data,
-            tx_dvalid => tx_dvalid,
-            ej_ready  => ej_ready);
+    ast_rx          <= (rx_data, rx_dvalid, rx_sop, rx_eop, (others => '0'));
+    tx_data         <= ast_tx.data;
+    tx_dvalid       <= ast_tx.valid;
+    ast_tx_bp.ready <= ej_ready;
+
 
     data_down : process (clk, reset)
         variable v_rx_dvalid, v_rx_sop, v_rx_eop, v_ej_ready : std_logic;
