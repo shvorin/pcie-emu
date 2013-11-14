@@ -22,8 +22,8 @@ architecture emu_top256 of emu_top256 is
 
     signal clk, reset : std_logic;
 
-    signal ast_rx, ast_tx : ast;
-    signal ast_tx_bp      : ast_bp;
+    signal ast_rx, ast_tx : ast_t;
+    signal ast_tx_bp      : ast_bp_t;
     signal rx_st_bardec   : std_logic_vector(7 downto 0);
 
     -- data representation for foreing calls
@@ -57,12 +57,12 @@ architecture emu_top256 of emu_top256 is
         return result;
     end;
 
-    function wrap(a : ast) return foreign_ast is
+    function wrap(a : ast_t) return foreign_ast is
     begin
         return (wrap(a.data), a.valid, a.sop, a.eop, a.empty);
     end;
 
-    function unwrap(f : foreign_ast) return ast is
+    function unwrap(f : foreign_ast) return ast_t is
     begin
         return (unwrap(f.data), f.valid, f.sop, f.eop, f.empty);
     end;
@@ -79,10 +79,10 @@ architecture emu_top256 of emu_top256 is
     attribute foreign of line256_up : procedure is "VHPIDIRECT line256_up";
 
     -- NB: corresponding C prototype is:
-    -- void line256_down(struct scalar_params *, ast256_t *ast, ast_bp_t *ast_bp)
+    -- void line256_down(struct scalar_params *, ast256_t *ast_t, ast_bp_t *ast_bp_t)
     procedure line256_down(bar_num        : out integer;
                            foreign_ast_rx : out foreign_ast;
-                           ast_tx_bp      : out ast_bp)
+                           ast_tx_bp      : out ast_bp_t)
     is
     begin
         assert false severity failure;
@@ -108,7 +108,7 @@ begin
     data_down : process (clk, reset)
         variable v_bar_num      : integer;
         variable foreign_ast_rx : foreign_ast;
-        variable v_ast_tx_bp    : ast_bp;
+        variable v_ast_tx_bp    : ast_bp_t;
 
         function decode(bar_num : integer) return std_logic_vector is
             variable result: std_logic_vector(7 downto 0) := (others => '0');
