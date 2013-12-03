@@ -26,7 +26,7 @@ AC_SUBST(GHDLFLAGS, "--ieee=synopsys -fexplicit")
 
 AC_SUBST(QSF_FILE, top.qsf)
 
-VHDL_COMMON_SOURCES=`cat $QSF_FILE | grep '^set_global_assignment -name VHDL_FILE ' | sed 's/set_global_assignment -name VHDL_FILE //g' | sed 's/"//g' | awk '//{printf "%s ",$0;next}{print}'`
+VHDL_COMMON_SOURCES=`cat $QSF_FILE | grep '^set_global_assignment -name VHDL_FILE ' | grep -v NOGHDL | sed 's/set_global_assignment -name VHDL_FILE //g' | sed 's/"//g' | awk '//{printf "%s ",$0;next}{print}'`
 AC_SUBST(VHDL_COMMON_SOURCES)
 
 # TODO: should exclude PCIE and other quartus-specific vhdl source files...
