@@ -4,6 +4,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use work.ast256.all;
+use work.avmm.all;
 
 entity pautina_ast_loopback is
     port (
@@ -37,7 +38,10 @@ begin
             ast_rx       => ast_rx,
             ast_tx       => ast_tx,
             ast_tx_bp    => ast_tx_bp,
-            rx_st_bardec => rx_st_bardec);
+            rx_st_bardec => rx_st_bardec,
+
+            i_avmm => open,
+            o_avmm => ((others => 'Z'), 'H'));
 end architecture;
 
 
