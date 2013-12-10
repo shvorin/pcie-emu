@@ -41,7 +41,7 @@ begin
             rx_st_bardec => rx_st_bardec,
 
             i_avmm => open,
-            o_avmm => ((others => 'Z'), 'H'));
+            o_avmm => nothing);
 end architecture;
 
 
