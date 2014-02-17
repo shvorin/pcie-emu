@@ -3,3 +3,14 @@
 *.rpt
 db
 incremental_db
+hc_output
+reconfig_mif
+*.fit.*
+*.map.*
+*.sta.*
+*.jdi
+*.pin
+*.qws
+*.done
+*.sof
+PLLJ_PLLSPE_INFO.txt
