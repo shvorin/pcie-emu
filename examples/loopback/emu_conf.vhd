@@ -5,6 +5,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 use work.ast256.all;
 use work.avmm.all;
+use work.cc_meta.all;                   -- FIXME
 
 entity pautina_ast_loopback is
     port (
@@ -21,8 +22,10 @@ end entity;
 architecture pautina_ast_loopback of pautina_ast_loopback is
     use work.vdata.all;
 
-    signal int_vdata : vflit256_t;
-    signal int_ready : std_logic;
+    subtype skifches_range is integer range 0 to SKIFCH_QTY-1;
+
+    signal int_vdata : vflit256_array(skifches_range);
+    signal int_ready : std_logic_vector(skifches_range);
 begin
     p_ast : entity work.pautina_ast
         port map (
