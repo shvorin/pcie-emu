@@ -5,7 +5,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 use work.ast256.all;
 use work.avmm.all;
-use work.cc_meta.all;                   -- FIXME
+use work.pautina_package.all;
 
 entity pautina_ast_loopback is
     port (
