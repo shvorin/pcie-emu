@@ -59,6 +59,15 @@ package util is
     function align2_down(v : std_logic_vector) return std_logic_vector;
     function align8_down(v : std_logic_vector) return std_logic_vector;
     function align8_up(v   : std_logic_vector) return std_logic_vector;
+
+    -- treat segment descriptor
+    function desc2mask(x : std_logic_vector) return std_logic_vector;
+    function desc2base(x : std_logic_vector) return std_logic_vector;
+    --
+    -- optimized version; hint_logsize must be guaranteed to be no greater than
+    -- actual logsize
+    function desc2mask(x : std_logic_vector; hint_logsize : natural) return std_logic_vector;
+    function desc2base(x : std_logic_vector; hint_logsize : natural) return std_logic_vector;
 end util;
 
 
@@ -280,4 +289,26 @@ package body util is
         return v1(v'high downto v'low + 3) & "000";
     end;
 
+    -- treat segment descriptor
+    function desc2mask(x : std_logic_vector) return std_logic_vector is
+    begin
+        return (x-1) xor x;
+    end;
+
+    function desc2base(x : std_logic_vector) return std_logic_vector is
+    begin
+        return (x-1) and x;
+    end;
+
+    function desc2mask(x : std_logic_vector; hint_logsize : natural) return std_logic_vector is
+        constant tail : std_logic_vector(hint_logsize - 1 downto 0) := (others => '1');
+    begin
+        return desc2mask(x(x'high downto x'low + hint_logsize)) & tail;
+    end;
+
+    function desc2base(x : std_logic_vector; hint_logsize : natural) return std_logic_vector is
+        constant tail : std_logic_vector(hint_logsize - 1 downto 0) := (others => '0');
+    begin
+        return desc2base(x(x'high downto x'low + hint_logsize)) & tail;
+    end;
 end util;
