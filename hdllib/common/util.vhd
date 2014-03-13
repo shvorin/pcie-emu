@@ -66,8 +66,8 @@ package util is
     --
     -- optimized version; hint_logsize must be guaranteed to be no greater than
     -- actual logsize
-    function desc2mask(x : std_logic_vector; hint_logsize : natural) return std_logic_vector;
-    function desc2base(x : std_logic_vector; hint_logsize : natural) return std_logic_vector;
+    function desc2mask(x : std_logic_vector; hint_logsize : natural; exact : boolean := false) return std_logic_vector;
+    function desc2base(x : std_logic_vector; hint_logsize : natural; exact : boolean := false) return std_logic_vector;
 end util;
 
 
@@ -300,15 +300,33 @@ package body util is
         return (x-1) and x;
     end;
 
-    function desc2mask(x : std_logic_vector; hint_logsize : natural) return std_logic_vector is
-        constant tail : std_logic_vector(hint_logsize - 1 downto 0) := (others => '1');
+    function desc2mask(x : std_logic_vector; hint_logsize : natural; exact : boolean := false)
+        return std_logic_vector
+    is
+        subtype hi_range is integer range x'high downto x'low + hint_logsize;
+        subtype lo_range is integer range x'low + hint_logsize - 1 downto x'low;
+
+        variable result : std_logic_vector(x'range);
     begin
-        return desc2mask(x(x'high downto x'low + hint_logsize)) & tail;
+        result(lo_range) := (others => '1');
+
+        if exact then
+            result(hi_range) := (others => '0');
+        else
+            result(hi_range) := desc2mask(x(hi_range));
+        end if;
+        return result;
     end;
 
-    function desc2base(x : std_logic_vector; hint_logsize : natural) return std_logic_vector is
+    function desc2base(x : std_logic_vector; hint_logsize : natural; exact : boolean := false)
+        return std_logic_vector
+    is
         constant tail : std_logic_vector(hint_logsize - 1 downto 0) := (others => '0');
     begin
-        return desc2base(x(x'high downto x'low + hint_logsize)) & tail;
+        if exact then
+            return x(x'high downto x'low + hint_logsize) & tail;
+        else
+            return desc2base(x(x'high downto x'low + hint_logsize)) & tail;
+        end if;
     end;
 end util;
