@@ -5,7 +5,7 @@ library ieee;
 
 use ieee.std_logic_1164.all;
 
-package common is
+package types is
     subtype dword is std_logic_vector(31 downto 0);
     subtype qword is std_logic_vector(63 downto 0);
     subtype qqword is std_logic_vector(127 downto 0);
@@ -20,4 +20,4 @@ package common is
 
     type boolean_array is array (integer range <>) of boolean;
     type integer_array is array (integer range <>) of integer;
-end common;
+end types;
