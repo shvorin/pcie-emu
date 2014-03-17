@@ -1,7 +1,6 @@
 -- Copyright (c) 2011-2014, Ailamazyan Program Systems Institute (Russian             
 -- Academy of Science). See COPYING in top-level directory.
 
-
 -- This package contains common types and functions; not router-specific stuff.
 
 library ieee;
@@ -9,13 +8,10 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_arith.all;
 use ieee.std_logic_unsigned.all;
 use ieee.std_logic_misc;
+use work.common.all;
 
 
 package util is
-    type boolean_array is array (integer range <>) of boolean;
-    type integer_array is array (integer range <>) of integer;
-    type integer_array2 is array (integer range <>, integer range <>) of integer;
-
     function maximum (constant t1, t2 : natural) return natural;
     function minimum (constant t1, t2 : natural) return natural;
     function minimum (constant t1, t2 : std_logic_vector) return std_logic_vector;
@@ -68,6 +64,9 @@ package util is
     -- actual logsize
     function desc2mask(x : std_logic_vector; hint_logsize : natural; exact : boolean := false) return std_logic_vector;
     function desc2base(x : std_logic_vector; hint_logsize : natural; exact : boolean := false) return std_logic_vector;
+
+    function extend64(v : std_logic_vector) return data_t;
+    function extend64(i : integer) return data_t;
 end util;
 
 
@@ -328,5 +327,18 @@ package body util is
         else
             return desc2base(x(x'high downto x'low + hint_logsize)) & tail;
         end if;
+    end;
+
+    function extend64(v : std_logic_vector) return data_t is
+        variable result : data_t := (others => '0');
+    begin
+        result(v'length - 1 downto 0) := v;
+
+        return result;
+    end;
+
+    function extend64(i : integer) return data_t is
+    begin
+        return conv_std_logic_vector(i, 64);
     end;
 end util;
