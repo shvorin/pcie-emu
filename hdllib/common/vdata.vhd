@@ -24,32 +24,42 @@ package vdata is
         dv   : boolean;
     end record;
 
+    function nothing return vdata_t;
+    function nothing return vdata256_t;
+
     type vdata_array is array (integer range <>) of vdata_t;
     type vdata256_array is array (integer range <>) of vdata256_t;
 
-    -- binary (i.e. via std_logic_vector) representation of vdata_t
-    subtype vdata_binary is std_logic_vector(data_t'length + 1 - 1 downto 0);
+    -- binary (i.e. via std_logic_vector) representation of vdata256_t
+    subtype vdata256_binary is std_logic_vector(256 + 1 - 1 downto 0);
 
-    function compose(arg   : vdata_t) return vdata_binary;
-    function decompose(arg : vdata_binary) return vdata_t;
+    function compose(arg   : vdata256_t) return vdata256_binary;
+    function decompose(arg : vdata256_binary) return vdata256_t;
 
-    type vdata_binary_vector is array (integer range <>) of vdata_binary;
-
-    -- valid bit is unset, other staff is meaningless
-    constant invalid_vdata : vdata_t := (dv => false, data => (others => '0'));
+    type vdata256_binary_vector is array (integer range <>) of vdata256_binary;
 end vdata;
 
 
 package body vdata is
-    function compose(arg : vdata_t) return vdata_binary is
+    function nothing return vdata_t is
+    begin
+        return (dv => false, data => (others => 'X'));
+    end;
+
+    function nothing return vdata256_t is
+    begin
+        return (dv => false, data => (others => 'X'));
+    end;
+
+    function compose(arg : vdata256_t) return vdata256_binary is
     begin
         return to_stdl(arg.dv) & arg.data;
     end;
 
-    function decompose(arg : vdata_binary) return vdata_t is
+    function decompose(arg : vdata256_binary) return vdata256_t is
     begin
-        return (dv   => arg(64) = '1',
-                data => arg(data_t'range));
+        return (dv   => arg(arg'high) = '1',
+                data => arg(data256_t'range));
     end;
 
 end vdata;
