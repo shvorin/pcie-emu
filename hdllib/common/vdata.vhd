@@ -36,7 +36,7 @@ package vdata is
     function compose(arg   : vdata256_t) return vdata256_binary;
     function decompose(arg : vdata256_binary) return vdata256_t;
 
-    type vdata256_binary_vector is array (integer range <>) of vdata256_binary;
+    type vdata256_binary_array is array (integer range <>) of vdata256_binary;
 end vdata;
 
 
