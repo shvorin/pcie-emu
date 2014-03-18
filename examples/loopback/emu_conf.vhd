@@ -24,7 +24,7 @@ architecture pautina_ast_loopback of pautina_ast_loopback is
 
     subtype skifches_range is integer range 0 to SKIFCH_QTY-1;
 
-    signal int_vdata : vflit256_array(skifches_range);
+    signal int_vdata : vdata256_array(skifches_range);
     signal int_ready : std_logic_vector(skifches_range);
 begin
     p_ast : entity work.pautina_ast
