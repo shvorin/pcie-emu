@@ -6,9 +6,17 @@ library ieee;
 use ieee.std_logic_1164.all;
 
 package types is
-    subtype dword is std_logic_vector(31 downto 0);
-    subtype qword is std_logic_vector(63 downto 0);
-    subtype qqword is std_logic_vector(127 downto 0);
+    constant dword_logsize   : natural := 2;
+    constant qword_logsize   : natural := 3;
+    constant qqword_logsize  : natural := 4;
+    constant data256_logsize : natural := 5;
+    constant cell_logsize    : natural := 6;
+
+    ---------------------------------------------------------------------------
+
+    subtype dword is std_logic_vector(2 ** (dword_logsize + 3) - 1 downto 0);
+    subtype qword is std_logic_vector(2 ** (qword_logsize + 3) - 1 downto 0);
+    subtype qqword is std_logic_vector(2 ** (qqword_logsize + 3) - 1 downto 0);
 
     subtype data_range is integer range 63 downto 0;
     subtype data_t is std_logic_vector(data_range);

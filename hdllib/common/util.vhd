@@ -65,8 +65,8 @@ package util is
     function desc2mask(x : std_logic_vector; hint_logsize : natural; exact : boolean := false) return std_logic_vector;
     function desc2base(x : std_logic_vector; hint_logsize : natural; exact : boolean := false) return std_logic_vector;
 
-    function extend64(v : std_logic_vector) return data_t;
-    function extend64(i : integer) return data_t;
+    function extend64(v : std_logic_vector) return qword;
+    function extend64(i : integer) return qword;
 end util;
 
 
@@ -329,15 +329,15 @@ package body util is
         end if;
     end;
 
-    function extend64(v : std_logic_vector) return data_t is
-        variable result : data_t := (others => '0');
+    function extend64(v : std_logic_vector) return qword is
+        variable result : qword := (others => '0');
     begin
         result(v'length - 1 downto 0) := v;
 
         return result;
     end;
 
-    function extend64(i : integer) return data_t is
+    function extend64(i : integer) return qword is
     begin
         return conv_std_logic_vector(i, 64);
     end;

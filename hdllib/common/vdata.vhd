@@ -15,7 +15,7 @@ package vdata is
     ---------------------------------------------------------------------------
 
     type vdata_t is record
-        data : data_t;
+        data : qword;
         dv   : boolean;
     end record;
 
