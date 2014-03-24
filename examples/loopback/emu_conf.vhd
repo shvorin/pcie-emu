@@ -43,8 +43,8 @@ begin
             ast_tx_bp    => ast_tx_bp,
             rx_st_bardec => rx_st_bardec,
 
-            i_avmm => open,
-            o_avmm => nothing);
+            i_avmm      => open,
+            o_avmm_data => nothing);
 end architecture;
 
 
