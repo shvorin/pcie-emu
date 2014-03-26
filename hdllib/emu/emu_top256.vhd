@@ -97,12 +97,11 @@ begin
 
     app : ast_ext_io
         port map (
-            clk   => clk,
-            reset => reset,
-
-            rx           => ast_rx,
-            tx           => ast_tx,
-            tx_bp        => ast_tx_bp,
+            clk          => clk,
+            reset        => reset,
+            ast_rx       => ast_rx,
+            ast_tx       => ast_tx,
+            ast_tx_bp    => ast_tx_bp,
             rx_st_bardec => rx_st_bardec);
 
     data_down : process (clk, reset)
@@ -111,7 +110,7 @@ begin
         variable v_ast_tx_bp    : ast_bp_t;
 
         function decode(bar_num : integer) return std_logic_vector is
-            variable result: std_logic_vector(7 downto 0) := (others => '0');
+            variable result : std_logic_vector(7 downto 0) := (others => '0');
         begin
             for i in result'range loop
                 if bar_num = i then

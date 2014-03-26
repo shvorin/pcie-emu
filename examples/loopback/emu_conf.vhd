@@ -3,6 +3,7 @@
 
 library ieee;
 use ieee.std_logic_1164.all;
+use work.types.all;
 use work.ast256.all;
 use work.avmm.all;
 use work.pautina_package.all;
@@ -22,10 +23,16 @@ end entity;
 architecture pautina_ast_loopback of pautina_ast_loopback is
     use work.vdata.all;
 
-    signal rx_vdata, tx_vdata : vdata256_array(skifch_range);
-    signal rx_ready, tx_ready : std_logic_vector(skifch_range);
+    subtype link_range is integer range 0 to -1;
+
+    signal rx_vdata, tx_vdata : vdata256_array(link_range);
+    signal rx_ready, tx_ready : std_logic_vector(link_range);
+
 begin
-    p_ast : entity work.pautina_ast
+    p_ast : pautina_ast
+        generic map (
+            nPorts => skifch_num,
+            nLinks => 0)
         port map (
             clk   => clk,
             reset => reset,
@@ -43,37 +50,35 @@ begin
 
             i_avmm      => open,
             o_avmm_data => nothing);
-
-    comm : entity work.comm(comm_loopback)
-        generic map (
-            nPorts => skifch_num,
-            nLinks => 0)
-        port map (
-            clk     => clk,
-            reset   => reset,
-            --
-            i_vdata => tx_vdata,
-            i_ready => tx_ready,
-            --
-            o_vdata => rx_vdata,
-            o_ready => rx_ready);
 end architecture;
 
+-- TODO: move comm upper
+configuration foo of pautina_ast is
+    for pautina_ast
+        for comm0 : comm
+            use entity work.comm(comm_loopback);
+        end for;
+    end for;
+end;
 
 use work.ast256.all;
+use work.pautina_package.all;
 
 configuration emu_conf of emu_top256 is
     for emu_top256
         for app : ast_ext_io
-            use entity work.pautina_ast_loopback
-                port map (
-                    clk          => clk,
-                    reset        => reset,
-                    --
-                    ast_rx       => rx,
-                    ast_tx       => tx,
-                    ast_tx_bp    => tx_bp,
-                    rx_st_bardec => rx_st_bardec);
+            use entity work.pautina_ast_loopback;
+            for pautina_ast_loopback
+                for p_ast : pautina_ast
+                    use configuration work.foo;
+                    --use entity work.pautina_ast(pautina_ast);
+                    --for pautina_ast
+                    --    for comm0 : comm
+                    --        use entity work.comm(comm_loopback);
+                    --    end for;
+                    --end for;
+                end for;
+            end for;
         end for;
     end for;
 end;
