@@ -22,19 +22,19 @@ end entity;
 architecture pautina_ast_loopback of pautina_ast_loopback is
     use work.vdata.all;
 
-    signal int_vdata : vdata256_array(skifch_range);
-    signal int_ready : std_logic_vector(skifch_range);
+    signal rx_vdata, tx_vdata : vdata256_array(skifch_range);
+    signal rx_ready, tx_ready : std_logic_vector(skifch_range);
 begin
     p_ast : entity work.pautina_ast
         port map (
             clk   => clk,
             reset => reset,
 
-            tx_vdata => int_vdata,
-            tx_ready => int_ready,
+            tx_vdata => tx_vdata,
+            tx_ready => tx_ready,
 
-            rx_vdata => int_vdata,
-            rx_ready => int_ready,
+            rx_vdata => rx_vdata,
+            rx_ready => rx_ready,
 
             ast_rx       => ast_rx,
             ast_tx       => ast_tx,
@@ -43,6 +43,20 @@ begin
 
             i_avmm      => open,
             o_avmm_data => nothing);
+
+    comm : entity work.comm(comm_loopback)
+        generic map (
+            nPorts => skifch_num,
+            nLinks => 0)
+        port map (
+            clk     => clk,
+            reset   => reset,
+            --
+            i_vdata => tx_vdata,
+            i_ready => tx_ready,
+            --
+            o_vdata => rx_vdata,
+            o_ready => rx_ready);
 end architecture;
 
 
