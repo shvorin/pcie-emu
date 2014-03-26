@@ -22,10 +22,10 @@ end entity;
 architecture pautina_ast_loopback of pautina_ast_loopback is
     use work.vdata.all;
 
-    subtype skifches_range is integer range 0 to SKIFCH_QTY-1;
+    subtype skifch_range is integer range 0 to SKIFCH_QTY-1;
 
-    signal int_vdata : vdata256_array(skifches_range);
-    signal int_ready : std_logic_vector(skifches_range);
+    signal int_vdata : vdata256_array(skifch_range);
+    signal int_ready : std_logic_vector(skifch_range);
 begin
     p_ast : entity work.pautina_ast
         port map (
