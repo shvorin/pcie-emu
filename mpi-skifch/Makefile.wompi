@@ -1,0 +1,9 @@
+CFLAGS = -Wall -Wextra
+CPPFLAGS = -Imisc -Iinclude -I../system-po/include
+
+LIBS = skifch_work.o skifch_misc.o
+
+all: $(LIBS)
+
+clean:
+	rm -f $(LIBS) *~
