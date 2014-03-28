@@ -10,11 +10,10 @@ AC_INIT(top, 1.0)
 AC_CONFIG_SRCDIR([top.qsf])
 AM_INIT_AUTOMAKE
 
-AC_SUBST(EMU_PATH, ['$(top_srcdir)/../../fpga-software/emu'])
+AC_SUBST(EMU_PATH, ['$(top_srcdir)/../../emu-server'])
 
 # Checks for programs.
 AC_PROG_CC
-AC_PROG_CXX
 AC_PROG_RANLIB
 
 # Checks for libraries.

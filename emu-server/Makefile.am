@@ -7,7 +7,7 @@ libemu_server_a_SOURCES = emu-server.c avalon-up.c avalon-down.c rreq-storage.c
 
 libemu_client_a_SOURCES = emu-client.c
 
-AM_CPPFLAGS = -I$(top_srcdir)/../system-po/include
+AM_CPPFLAGS = -I$(top_srcdir)/../include
 
 
 EXTRA_DIST = *.h
