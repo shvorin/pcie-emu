@@ -52,16 +52,7 @@ begin
             o_avmm_data => nothing);
 end architecture;
 
--- TODO: move comm upper
-configuration foo of pautina_ast is
-    for pautina_ast
-        for comm0 : comm
-            use entity work.comm(comm_loopback);
-        end for;
-    end for;
-end;
 
-use work.ast256.all;
 use work.pautina_package.all;
 
 configuration emu_conf of emu_top256 is
@@ -70,13 +61,12 @@ configuration emu_conf of emu_top256 is
             use entity work.pautina_ast_loopback;
             for pautina_ast_loopback
                 for p_ast : pautina_ast
-                    use configuration work.foo;
-                    --use entity work.pautina_ast(pautina_ast);
-                    --for pautina_ast
-                    --    for comm0 : comm
-                    --        use entity work.comm(comm_loopback);
-                    --    end for;
-                    --end for;
+                    use entity work.pautina_ast(pautina_ast);
+                    for pautina_ast
+                        for comm0 : comm
+                            use entity work.comm(comm_loopback);
+                        end for;
+                    end for;
                 end for;
             end for;
         end for;
