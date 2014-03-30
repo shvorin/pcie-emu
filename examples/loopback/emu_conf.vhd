@@ -73,11 +73,11 @@ configuration emu_conf of emu_top256 is
                                     reset   => reset,
                                     node_id => node_id,
                                     --
-                                    i_vdata => tx_vdata_comm,
-                                    i_ready => tx_ready_comm,
+                                    vdata_i => tx_vdata_comm,
+                                    ready_i => tx_ready_comm,
                                     --
-                                    o_vdata => rx_vdata_comm,
-                                    o_ready => rx_ready_comm);
+                                    vdata_o => rx_vdata_comm,
+                                    ready_o => rx_ready_comm);
                         end for;
                     end for;
                 end for;
