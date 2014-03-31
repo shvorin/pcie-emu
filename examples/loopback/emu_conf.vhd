@@ -77,7 +77,9 @@ configuration emu_conf of emu_top256 is
                                     ready_i => tx_ready_comm,
                                     --
                                     vdata_o => rx_vdata_comm,
-                                    ready_o => rx_ready_comm);
+                                    ready_o => rx_ready_comm,
+                                    --
+                                    credits => credits);
                         end for;
                     end for;
                 end for;
