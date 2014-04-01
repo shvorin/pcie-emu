@@ -64,22 +64,7 @@ configuration emu_conf of emu_top256 is
                     use entity work.pautina_ast(pautina_ast);
                     for pautina_ast
                         for comm0 : comm
-                            use entity work.comm_routing(comm_routing)
-                                generic map (
-                                    nPorts => nPorts,
-                                    nLinks => nLinks)
-                                port map (
-                                    clk     => clk,
-                                    reset   => reset,
-                                    node_id => node_id,
-                                    --
-                                    vdata_i => tx_vdata_comm,
-                                    ready_i => tx_ready_comm,
-                                    --
-                                    vdata_o => rx_vdata_comm,
-                                    ready_o => rx_ready_comm,
-                                    --
-                                    credits => credits);
+                            use entity work.comm(comm_loopback);
                         end for;
                     end for;
                 end for;
