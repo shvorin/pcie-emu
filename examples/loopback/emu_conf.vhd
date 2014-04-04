@@ -7,8 +7,9 @@ use work.types.all;
 use work.ast256.all;
 use work.avmm.all;
 use work.pautina_package.all;
+use work.qsfp_package.all;
 
-entity pautina_ast_loopback is
+entity emu_pautina_wrap is
     port (
         clk   : in std_logic;
         reset : in std_logic;
@@ -20,36 +21,49 @@ entity pautina_ast_loopback is
         rx_st_bardec : in  std_logic_vector(7 downto 0));
 end entity;
 
-architecture pautina_ast_loopback of pautina_ast_loopback is
-    use work.vdata.all;
-
-    subtype link_range is integer range 0 to -1;
-
-    signal rx_vdata, tx_vdata : vdata256_array(link_range);
-    signal rx_ready, tx_ready : std_logic_vector(link_range);
-
+architecture emu_pautina_wrap of emu_pautina_wrap is
 begin
-    p_ast : pautina_ast
-        generic map (
-            nPorts => skifch_num,
-            nLinks => 0)
+    -- NB: configuration should reside in examples/EXAMPLE_NAME/
+    pautina : configuration work.pautina_io_cfg
         port map (
             clk   => clk,
             reset => reset,
-
-            tx_vdata => tx_vdata,
-            tx_ready => tx_ready,
-
-            rx_vdata => rx_vdata,
-            rx_ready => rx_ready,
 
             ast_rx       => ast_rx,
             ast_tx       => ast_tx,
             ast_tx_bp    => ast_tx_bp,
             rx_st_bardec => rx_st_bardec,
 
-            i_avmm      => open,
-            o_avmm_data => nothing);
+            -- flash
+            flash_address => open,
+            nflash_ce0    => open,
+            nflash_ce1    => open,
+            nflash_we     => open,
+            nflash_oe     => open,
+            flash_data    => open,
+            nflash_reset  => open,
+            flash_clk     => open,
+            flash_wait0   => 'X',
+            flash_wait1   => 'X',
+            nflash_adv    => open,
+
+            -- QSFP: significant signals
+            qsfp_refclk => (others => 'X'),
+            qsfp_tx_p   => open,
+            qsfp_rx_p   => (others => (others => 'X')),
+
+            -- QSFP: misc signals
+            qsfp_mod_seln   => open,
+            qsfp_rstn       => open,
+            qsfp_scl        => open,
+            qsfp_sda        => open,
+            qsfp_interruptn => (others => 'X'),
+            qsfp_mod_prsn   => (others => 'X'),
+            qsfp_lp_mode    => open,
+
+            -- LEDs
+            user_led_g => open,
+            user_led_r => open);
 end architecture;
 
 
@@ -58,17 +72,7 @@ use work.pautina_package.all;
 configuration emu_conf of emu_top256 is
     for emu_top256
         for app : ast_ext_io
-            use entity work.pautina_ast_loopback;
-            for pautina_ast_loopback
-                for p_ast : pautina_ast
-                    use entity work.pautina_ast(pautina_ast);
-                    for pautina_ast
-                        for comm0 : comm
-                            use entity work.comm(comm_loopback);
-                        end for;
-                    end for;
-                end for;
-            end for;
+            use entity work.emu_pautina_wrap;
         end for;
     end for;
 end;
