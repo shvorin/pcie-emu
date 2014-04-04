@@ -29,7 +29,7 @@ VHDL_COMMON_SOURCES=`cat $QSF_FILE | grep '^set_global_assignment -name VHDL_FIL
 AC_SUBST(VHDL_COMMON_SOURCES)
 
 # TODO: should exclude PCIE and other quartus-specific vhdl source files...
-AC_SUBST(VHDL_EMU_SOURCES, "$VHDL_COMMON_SOURCES ../../hdllib/emu/emu_top256.vhd ../../hdllib/emu/clock_gen.vhd emu_conf.vhd")
+AC_SUBST(VHDL_EMU_SOURCES, "$VHDL_COMMON_SOURCES ../../hdllib/emu/emu_top256.vhd ../../hdllib/emu/clock_gen.vhd ../../hdllib/emu/pautina_wrap_emu.vhd ../../hdllib/emu/emu_top_cfg.vhd")
 
 AC_SUBST(VHDL_QUARTUS_SOURCES, "$VHDL_COMMON_SOURCES")
 

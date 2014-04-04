@@ -9,7 +9,8 @@ use work.avmm.all;
 use work.pautina_package.all;
 use work.qsfp_package.all;
 
-entity emu_pautina_wrap is
+-- emulation version of pautina_wrap
+entity pautina_wrap_emu is
     port (
         clk   : in std_logic;
         reset : in std_logic;
@@ -21,7 +22,7 @@ entity emu_pautina_wrap is
         rx_st_bardec : in  std_logic_vector(7 downto 0));
 end entity;
 
-architecture emu_pautina_wrap of emu_pautina_wrap is
+architecture pautina_wrap_emu of pautina_wrap_emu is
 begin
     -- NB: configuration should reside in examples/EXAMPLE_NAME/
     pautina : configuration work.pautina_io_cfg
@@ -65,15 +66,3 @@ begin
             user_led_g => open,
             user_led_r => open);
 end architecture;
-
-
-use work.pautina_package.all;
-
-configuration emu_conf of emu_top256 is
-    for emu_top256
-        for app : ast_ext_io
-            use entity work.emu_pautina_wrap;
-        end for;
-    end for;
-end;
-

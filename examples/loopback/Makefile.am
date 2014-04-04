@@ -1,7 +1,6 @@
 # Copyright (c) 2011-2014, Ailamazyan Program Systems Institute (Russian             
 # Academy of Science). See COPYING in top-level directory.
 
-
 bin_PROGRAMS = emu_top
 
 GHDL_LINKER_FLAGS = -Wl,-L$(EMU_PATH) -Wl,-lemu-server -Wl,-largtable2 -Wl,-lrt -o emu_top
@@ -12,9 +11,9 @@ emu: emu_top$(EXEEXT)
 
 emu_top$(EXEEXT): work-obj93.cf $(VHDL_EMU_SOURCES) $(EMU_PATH)/libemu-server.a
 	$(MAKE) -C $(EMU_PATH)
-	$(GHDL) -m $(GHDLFLAGS) $(GHDL_LINKER_FLAGS) emu_conf
+	$(GHDL) -m $(GHDLFLAGS) $(GHDL_LINKER_FLAGS) emu_top_cfg
 # FIXME: GHDL's make is not sensitive to lib changes
-	$(GHDL) -e $(GHDLFLAGS) $(GHDL_LINKER_FLAGS) emu_conf
+	$(GHDL) -e $(GHDLFLAGS) $(GHDL_LINKER_FLAGS) emu_top_cfg
 
 work-obj93.cf: $(QSF)
 	$(GHDL) -i $(VHDL_EMU_SOURCES)
