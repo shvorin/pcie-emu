@@ -67,12 +67,12 @@ void line256_up(const ast256_t *ast) {
 
     switch(parse_type(head)) {
     case tlp_kind_write:
-      printf("UP: kind_write, len: %d, nLines: %d, addr: 0x%lX\n",
+      printf("UP: kind_write, len: %u, nLines: %lu, addr: 0x%lX\n",
              head.rw.dw0.s.len, nLines, head.rw.rawaddr);
       break;
 
     case tlp_kind_cpl:
-      printf("UP: kind_cpl, len: %d, nLines: %d, cpl_tag: 0x%X\n",
+      printf("UP: kind_cpl, len: %u, nLines: %lu, cpl_tag: 0x%X\n",
              head.rw.dw0.s.len, nLines, head.cpl.dw2.s.tag);
       break;
 

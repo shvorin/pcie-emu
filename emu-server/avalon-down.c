@@ -33,6 +33,7 @@ static int pollin_revent(short revent) {
     return 1;
 
   error(1, 0, "unexpected result in poll()");
+  return 0;
 }
 
 void line256_down(line_down_scalars_t *bar, ast256_t *ast, ast_bp_t *ast_bp) {
@@ -136,7 +137,7 @@ void line256_down(line_down_scalars_t *bar, ast256_t *ast, ast_bp_t *ast_bp) {
 
     /* payload */
     memcpy(ast->data + 4, p.bdata, 16);
-    printf("DOWN: issue header, nLines: %d\n", nLines);
+    printf("DOWN: issue header, nLines: %lu\n", nLines);
   } else {
     /* payload */
     memcpy(ast->data, p.bdata + 16 + 32 * (count - 1), 32);

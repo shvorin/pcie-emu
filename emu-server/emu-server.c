@@ -4,6 +4,7 @@
 
 #include <defines.h>
 
+#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/un.h>
@@ -81,6 +82,7 @@ static void *mkshm_exclusive(const char *fname, int *fd, size_t size) {
 
  failed:
   error(1, errno, "failed to create a new shmem segment");
+  return NULL;
 }
 
 
@@ -221,13 +223,11 @@ int main (int argc, char **argv) {
 
   void *dram_segstart = mkshm_exclusive(dram_fname, &dram_shm_fd, DRAM_SEGSIZE);
 
-  size_t i;
-
   FILE *fd = fopen(dev_fname, "w");
 
   const bar_t *b;
   for(b=bars; b<bars+nBars; ++b)
-    fprintf(fd, "%X %X %llX\n", b->dev_num, b->bar_num, b->length);
+    fprintf(fd, "%X %X %lX\n", b->dev_num, b->bar_num, b->length);
 
   fclose(fd);
 
@@ -262,7 +262,7 @@ int main (int argc, char **argv) {
 
   acceptClient();
 
-  printf("dram_segstart: 0x%lX\n", dram_segstart);
+  printf("dram_segstart: %p\n", dram_segstart);
   // 4. init up- and downstream submodules
   init_tlp_up(dram_segstart, DRAM_SEGSIZE);
 
@@ -336,6 +336,6 @@ void acceptClient() {
 
   Socket_SendValue(cliSock, nSocks);
 
-  printf("A client #%d connected!\n", nSocks);
+  printf("A client #%lu connected!\n", nSocks);
   ++nSocks;
 }
