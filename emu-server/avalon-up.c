@@ -105,7 +105,7 @@ void line256_up(const ast256_t *ast) {
     case tlp_kind_cpl:
       {
         token_t token = head.cpl.dw2.s.tag;
-        printf("avalon-up: token: %d\n", token);
+        printf("avalon-up: token: %x\n", token);
         rreq_item_t *item = rreq_find(token);
         if(NULL == item)
           error(1, 0, "a reply to an unknown read request");

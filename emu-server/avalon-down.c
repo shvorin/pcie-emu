@@ -108,10 +108,11 @@ void line256_down(line_down_scalars_t *bar, ast256_t *ast, ast_bp_t *ast_bp) {
 
     case readReq:
       {
-        token_t token = p.bdata[0] & 0xFF;
+        const uint64_t clientId = p.bdata[0];
+        token_t token = clientId & 0xFF;
         rreq_item_t item = {.token = token,
-                            .clientId = p.bdata[1],
-                            .nBytes = p.bdata[2]};
+                            .clientId = clientId,
+                            .nBytes = p.bdata[1]};
 
         rreq_item_t *ptr_item = malloc(sizeof(rreq_item_t));
         *ptr_item = item;

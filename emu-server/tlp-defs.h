@@ -115,6 +115,7 @@ static tlp_header mk_r32_header(uint64_t addr, int bc, int tag) {
     .be_lst = ~0,
     .be_fst = ~0,
     .tag = tag,
+    .req_id = ~0, /* req_id (requester's PCI id) is unused */
   };
 
   header.rw.rawaddr = combine_addr(addr, 0);
