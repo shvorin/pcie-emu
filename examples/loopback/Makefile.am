@@ -24,4 +24,5 @@ map fit asm sta quartus:
 	$(MAKE) -f Makefile.quartus SOURCE_FILES="$(VHDL_QUARTUS_SOURCES)" PROJECT="$(PACKAGE_NAME)" $@
 
 quartus-clean:
+	quartus_sh --clean "$(PACKAGE_NAME)"
 	$(MAKE) -f Makefile.quartus SOURCE_FILES="$(VHDL_QUARTUS_SOURCES)" PROJECT="$(PACKAGE_NAME)" clean
