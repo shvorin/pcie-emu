@@ -109,8 +109,9 @@ void line256_down(line_down_scalars_t *bar, ast256_t *ast, ast_bp_t *ast_bp) {
 
     case readReq:
       {
+        static int token_counter = 0;
         const uint64_t clientId = p.bdata[0];
-        token_t token = clientId & 0xFF;
+        token_t token = ((clientId << 4) & 0xFF) | (token_counter++ & 0xF);
         rreq_item_t item = {.token = token,
                             .clientId = clientId,
                             .nBytes = p.bdata[1]};
@@ -137,7 +138,8 @@ void line256_down(line_down_scalars_t *bar, ast256_t *ast, ast_bp_t *ast_bp) {
 
     /* payload */
     memcpy(ast->data + 4, p.bdata, 16);
-    printf("DOWN: issue header, nLines: %lu\n", nLines);
+
+    show_tlp_head("DOWN:", nLines, head);
   } else {
     /* payload */
     memcpy(ast->data, p.bdata + 16 + 32 * (count - 1), 32);

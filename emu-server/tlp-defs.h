@@ -171,4 +171,26 @@ static int is_4dw(tlp_header head) {
   return head.rw.dw0.s.fmt & 1;
 }
 
+static void show_tlp_head(const char *prefix, size_t nLines, tlp_header head) {
+  switch(parse_type(head)) {
+  case tlp_kind_write:
+    printf("%s kind_write, len: %u, nLines: %lu, addr: 0x%08lX\n" /* NB: 32-bit addr is usually used */,
+           prefix, head.rw.dw0.s.len, nLines, head.rw.rawaddr);
+    break;
+
+  case tlp_kind_cpl:
+    printf("%s kind_cpl, len: %u, nLines: %lu, low_addr: 0x%02X, cpl_tag: 0x%02X\n",
+           prefix, head.rw.dw0.s.len, nLines, head.cpl.dw2.s.low_addr & 0x7F, head.cpl.dw2.s.tag & 0xFF);
+    break;
+
+  case tlp_kind_read:
+    printf("%s kind_read, len: %u, nLines: %lu, addr: 0x%08lX, cpl_tag: 0x%02X\n",
+           prefix, head.rw.dw0.s.len, nLines, head.rw.rawaddr, head.rw.dw1.s.tag & 0xFF);
+    break;
+
+  default:
+    printf("%s kind_unknown\n", prefix);
+  }
+}
+
 #endif /* TLP_DEFS_H */

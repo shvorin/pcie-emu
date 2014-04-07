@@ -65,26 +65,7 @@ void line256_up(const ast256_t *ast) {
     /* hhhhdddd, dddddddd, ... */
     nLines = (head.rw.dw0.s.len + 3)/8 + 1;
 
-    switch(parse_type(head)) {
-    case tlp_kind_write:
-      printf("UP: kind_write, len: %u, nLines: %lu, addr: 0x%lX\n",
-             head.rw.dw0.s.len, nLines, head.rw.rawaddr);
-      break;
-
-    case tlp_kind_cpl:
-      printf("UP: kind_cpl, len: %u, nLines: %lu, cpl_tag: 0x%X\n",
-             head.rw.dw0.s.len, nLines, head.cpl.dw2.s.tag);
-      break;
-
-    case tlp_kind_read:
-      printf("UP: kind_read (not supported)\n");
-      break;
-
-    default:
-      printf("UP: kind_unknown\n");
-      
-    }
-    
+    show_tlp_head("UP:", nLines, head);
 
     /* payload */
     memcpy(p_bdata, ast->data + 4, 16);
@@ -104,8 +85,7 @@ void line256_up(const ast256_t *ast) {
 
     case tlp_kind_cpl:
       {
-        token_t token = head.cpl.dw2.s.tag;
-        printf("avalon-up: token: %x\n", token);
+        token_t token = head.cpl.dw2.s.tag & 0xFF;
         rreq_item_t *item = rreq_find(token);
         if(NULL == item)
           error(1, 0, "a reply to an unknown read request");
