@@ -172,20 +172,23 @@ static int is_4dw(tlp_header head) {
 }
 
 static void show_tlp_head(const char *prefix, size_t nLines, tlp_header head) {
+  const int len = head.rw.dw0.s.len & 0x3FF; /* len:10 */
+  const int bc = len << 2; /* byte count */
+
   switch(parse_type(head)) {
   case tlp_kind_write:
-    printf("%s kind_write, len: %u, nLines: %lu, addr: 0x%08lX\n" /* NB: 32-bit addr is usually used */,
-           prefix, head.rw.dw0.s.len, nLines, head.rw.rawaddr);
+    printf("%s kind_write, nLines: %lu, addr: 0x%08lX+%X\n" /* NB: 32-bit addr is usually used */,
+           prefix, nLines, head.rw.rawaddr, bc);
     break;
 
   case tlp_kind_cpl:
-    printf("%s kind_cpl, len: %u, nLines: %lu, low_addr: 0x%02X, cpl_tag: 0x%02X\n",
-           prefix, head.rw.dw0.s.len, nLines, head.cpl.dw2.s.low_addr & 0x7F, head.cpl.dw2.s.tag & 0xFF);
+    printf("%s kind_cpl, nLines: %lu, low_addr: 0x%02X+%X, cpl_tag: 0x%02X\n",
+           prefix, nLines, head.cpl.dw2.s.low_addr & 0x7F, bc, head.cpl.dw2.s.tag & 0xFF);
     break;
 
   case tlp_kind_read:
-    printf("%s kind_read, len: %u, nLines: %lu, addr: 0x%08lX, cpl_tag: 0x%02X\n",
-           prefix, head.rw.dw0.s.len, nLines, head.rw.rawaddr, head.rw.dw1.s.tag & 0xFF);
+    printf("%s kind_read, nLines: %lu, addr: 0x%08lX+%X, cpl_tag: 0x%02X\n",
+           prefix, nLines, head.rw.rawaddr, bc, head.rw.dw1.s.tag & 0xFF);
     break;
 
   default:
