@@ -63,6 +63,6 @@ begin
             qsfp_lp_mode    => open,
 
             -- LEDs
-            user_led_g => open,
-            user_led_r => open);
+            qsfp_led => open,
+            sv_led => open);
 end architecture;
