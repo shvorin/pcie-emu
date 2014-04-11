@@ -50,7 +50,7 @@ void line256_down(line_down_scalars_t *bar, ast256_t *ast, ast_bp_t *ast_bp) {
   static size_t hp = 1;
   static size_t count = 0;
   static size_t nLines = /* some meaningless value */-1;
-  static size_t payload_qw_cnt, payload_qw_end;
+  static size_t payload_qw_end;
 
   if(count == 0) {
     char * buf = (char *)&p;
@@ -97,7 +97,6 @@ void line256_down(line_down_scalars_t *bar, ast256_t *ast, ast_bp_t *ast_bp) {
   if(count == 0) {
     /* issue header */
 
-    payload_qw_cnt = 0;
     payload_qw_end = 0; /* no payload by default */
 
     switch(p.kind) {
@@ -153,6 +152,8 @@ void line256_down(line_down_scalars_t *bar, ast256_t *ast, ast_bp_t *ast_bp) {
   ast->valid = stdl_1;
   ast->sop = count == 0 ? stdl_1 : stdl_0;
 
+  show_line256("DOWN: ", ast, count, payload_qw_end);
+
   ++count;
 
   if(count == nLines) {
@@ -160,21 +161,6 @@ void line256_down(line_down_scalars_t *bar, ast256_t *ast, ast_bp_t *ast_bp) {
     ast->eop = stdl_1;
   } else {
     ast->eop = stdl_0;
-  }
-
-  {
-    int i;
-    printf("DOWN: ");
-    for(i=3;i>=0;--i) {
-      /* colorize payload */
-      const int colored = stdout_isatty
-        && payload_qw_cnt >= 2 && payload_qw_cnt < payload_qw_end;
-      const char *fmt = colored ? "\e[0;32m%016lX \e[0m" : "%016lX ";
-
-      printf(fmt, *((uint64_t*)(ast->data+2*i)));
-      ++payload_qw_cnt;
-    }
-    printf("\n");
   }
 }
 

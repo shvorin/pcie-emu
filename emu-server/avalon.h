@@ -6,6 +6,8 @@
 
 #include <ghdl-bindings.h>
 
+extern int stdout_isatty;
+
 typedef struct {
   std_logic dvalid;
   std_logic sop, eop;
@@ -36,5 +38,20 @@ void line128_up(std_logic tx_dvalid, const uint32_t arr[4]);
 
 void line256_down(line_down_scalars_t *bar, ast256_t *ast, ast_bp_t *ast_bp);
 void line256_up(const ast256_t *ast);
+
+static void show_line256(const char *prefix, const ast256_t *ast, size_t line_count, size_t payload_qw_end) {
+  int i;
+  printf("%s %d %d ", prefix, line_count, payload_qw_end);
+  for(i=3;i>=0;--i) {
+    const size_t payload_qw_cnt = line_count * 4 + i;
+    /* colorize payload */
+    const int colored = stdout_isatty
+      && payload_qw_cnt >= 2 && payload_qw_cnt < payload_qw_end;
+    const char *fmt = colored ? "\e[0;32m%016lX \e[0m" : "%016lX ";
+
+    printf(fmt, *((uint64_t*)(ast->data+2*i)));
+  }
+  printf("\n");
+}
 
 #endif /* AVALON_H */
