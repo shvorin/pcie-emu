@@ -17,4 +17,7 @@ extern size_t nSocks;
 
 void acceptClient();
 
+extern int stdout_isatty;
+
+
 #endif /* EMU_SERVER_H */

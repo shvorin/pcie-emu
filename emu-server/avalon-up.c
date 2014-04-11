@@ -53,6 +53,7 @@ void line256_up(const ast256_t *ast) {
 
   static char p_bdata[1024]; // FIXME: ad hoc
   static tlp_header head;
+  static size_t payload_qw_cnt, payload_qw_end;
 
   ++count;
 
@@ -69,6 +70,18 @@ void line256_up(const ast256_t *ast) {
 
     /* payload */
     memcpy(p_bdata, ast->data + 4, 16);
+
+    payload_qw_cnt = 0;
+
+    switch(parse_type(head)) {
+    case writeReq:
+    case tlp_kind_cpl:
+      payload_qw_end = (head.rw.dw0.s.len >> 1) + 2;
+      break;
+
+    default:
+      payload_qw_end = 0;
+    }
   } else {
     /* payload */
     memcpy(p_bdata + 16 + 32 * (count - 2), ast->data, 32);
@@ -110,8 +123,15 @@ void line256_up(const ast256_t *ast) {
   {
     int i;
     printf("UP: ");
-    for(i=3;i>=0;--i)
-      printf("%016lX ", *((uint64_t*)(ast->data+2*i)));
+    for(i=3;i>=0;--i) {
+      /* colorize payload */
+      const int colored = stdout_isatty
+        && payload_qw_cnt >= 2 && payload_qw_cnt < payload_qw_end;
+      const char *fmt = colored ? "\e[0;32m%016lX \e[0m" : "%016lX ";
+
+      printf(fmt, *((uint64_t*)(ast->data+2*i)));
+      ++payload_qw_cnt;
+    }
     printf("\n");
   }
 }

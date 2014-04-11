@@ -50,6 +50,7 @@ void line256_down(line_down_scalars_t *bar, ast256_t *ast, ast_bp_t *ast_bp) {
   static size_t hp = 1;
   static size_t count = 0;
   static size_t nLines = /* some meaningless value */-1;
+  static size_t payload_qw_cnt, payload_qw_end;
 
   if(count == 0) {
     char * buf = (char *)&p;
@@ -96,6 +97,9 @@ void line256_down(line_down_scalars_t *bar, ast256_t *ast, ast_bp_t *ast_bp) {
   if(count == 0) {
     /* issue header */
 
+    payload_qw_cnt = 0;
+    payload_qw_end = 0; /* no payload by default */
+
     switch(p.kind) {
     case writeReq:
       head = mk_w32_header(p.addr, p.nBytes);
@@ -105,6 +109,7 @@ void line256_down(line_down_scalars_t *bar, ast256_t *ast, ast_bp_t *ast_bp) {
       /* hhhhdddd, dddddddd, ... */
       nLines = (head.rw.dw0.s.len + 3)/8 + 1;
 
+      payload_qw_end = (head.rw.dw0.s.len >> 1) + 2;
       break;
 
     case readReq:
@@ -160,8 +165,15 @@ void line256_down(line_down_scalars_t *bar, ast256_t *ast, ast_bp_t *ast_bp) {
   {
     int i;
     printf("DOWN: ");
-    for(i=3;i>=0;--i)
-      printf("%016lX ", *((uint64_t*)(ast->data+2*i)));
+    for(i=3;i>=0;--i) {
+      /* colorize payload */
+      const int colored = stdout_isatty
+        && payload_qw_cnt >= 2 && payload_qw_cnt < payload_qw_end;
+      const char *fmt = colored ? "\e[0;32m%016lX \e[0m" : "%016lX ";
+
+      printf(fmt, *((uint64_t*)(ast->data+2*i)));
+      ++payload_qw_cnt;
+    }
     printf("\n");
   }
 }

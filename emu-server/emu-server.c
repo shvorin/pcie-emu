@@ -40,6 +40,8 @@ static const size_t nBars = sizeof(bars)/sizeof(bar_t);
 // config parameters
 const size_t qcapacity = 10;
 
+int stdout_isatty;
+
 static int dram_shm_fd;
 
 struct pollfd pollfds[NSOCKS_MAX];
@@ -186,6 +188,8 @@ int main (int argc, char **argv) {
   snprintf(dram_fname, sizeof(dram_fname), "/emu.%s.shm-dram", instanceId);
 
   nSocks = 1; // only a server
+
+  stdout_isatty = isatty(fileno(stdout));
 
   // 1. check locks
   {
