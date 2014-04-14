@@ -5,9 +5,8 @@
 #define TLP_DEFS_H
 
 #include <stdint.h>
+#include <exec-pautina-config.h>
 
-/* FIXME: actual endian for i386 and amd64 is big (not little!); it seems to be
- * a bug in gcc libs */
 #if !(defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)
 #  error unsupported endian
 #endif
@@ -101,7 +100,7 @@ static uint64_t parse_addr(uint64_t rawaddr, int is_4dw) {
 
 static tlp_header mk_r32_header(uint64_t addr, int bc, int tag) {
   if(bc % 4 != 0)
-    error(1, 0, "not implemented");
+    ERROR(1, 0, "not implemented");
 
   tlp_header header = {.r = {0,0,0,0}};
 
@@ -125,7 +124,7 @@ static tlp_header mk_r32_header(uint64_t addr, int bc, int tag) {
 
 static tlp_header mk_w32_header(uint64_t addr, int bc) {
   if(bc % 4 != 0)
-    error(1, 0, "not implemented");
+    ERROR(1, 0, "not implemented");
 
   tlp_header header = {.r = {0,0,0,0}};
 

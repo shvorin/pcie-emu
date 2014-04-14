@@ -1,7 +1,6 @@
 /* Copyright (c) 2011-2014, Ailamazyan Program Systems Institute (Russian             
  * Academy of Science). See COPYING in top-level directory. */
 
-
 #include <defines.h>
 
 #include <stdlib.h>
@@ -21,6 +20,8 @@
 #include <emu-server.h>
 #include <socket-util.h>
 #include <bar-defs.h>
+#include <exec-pautina-config.h>
+
 
 void init_tlp_up(char * dram_segment, size_t _dram_segsize);
 
@@ -83,7 +84,7 @@ static void *mkshm_exclusive(const char *fname, int *fd, size_t size) {
   return addr;
 
  failed:
-  error(1, errno, "failed to create a new shmem segment");
+  ERROR(1, errno, "failed to create a new shmem segment");
   return NULL;
 }
 
@@ -105,7 +106,6 @@ static void usage(void **argtable, const char *progname) {
   printf("\n*** Emu server section\n");
   arg_print_glossary(stdout, argtable,"  %-25s %s\n");
 }
-
 
 int main (int argc, char **argv) {
   /* 0. Parse command line arguments */
@@ -164,7 +164,7 @@ int main (int argc, char **argv) {
     if(nerrors > 0) {
       /* Display the error details contained in the arg_end struct.*/
       arg_print_errors(stdout, end, argv[0]);
-      error(1, 0, "try '%s --help'", argv[0]);
+      printf("try '%s --help'", argv[0]);
     }
   }
 
@@ -191,25 +191,26 @@ int main (int argc, char **argv) {
 
   stdout_isatty = isatty(fileno(stdout));
 
-  // 1. check locks
+  /* 1. check locks */
   {
-    pid_t pid = getpid(), saved_pid;
+    const pid_t pid = getpid();
+    pid_t saved_pid;
     FILE *fd = fopen(pid_fname, "r");
 
     if(fd != NULL) {
       if(fscanf(fd, "%d", &saved_pid) != 1)
-        error(1, errno, "unknown stale pidfile %s", pid_fname);
+        ERROR(1, errno, "unknown stale pidfile %s", pid_fname);
 
       // check if such process exists
       char proc_pid_fname[100];
       snprintf(proc_pid_fname, 100, "/proc/%d", saved_pid);
 
       if(access(proc_pid_fname, F_OK) != -1)
-        error(1, errno, "an instance of %s seems to be running; pidfile is %s",
+        ERROR(1, errno, "an instance of %s seems to be running; pidfile is %s",
               argv[0], pid_fname);
 
       if(unlink(pid_fname) == -1)
-        error(1, errno, "failed to unlink() stale pidfile %s", pid_fname);
+        ERROR(1, errno, "failed to unlink() stale pidfile %s", pid_fname);
 
       unlink(sock_fname);
     }
@@ -217,13 +218,13 @@ int main (int argc, char **argv) {
     fd = fopen(pid_fname, "w");
 
     if(fd == NULL)
-      error(1, errno, "failed to create a pidfile %s", pid_fname);
+      ERROR(1, errno, "failed to create a pidfile %s", pid_fname);
 
     fprintf(fd, "%d\n", pid);
     fclose(fd);
   }
 
-  // 2. create shared segments
+  /* 2. create shared segments */
 
   void *dram_segstart = mkshm_exclusive(dram_fname, &dram_shm_fd, DRAM_SEGSIZE);
 
@@ -235,45 +236,48 @@ int main (int argc, char **argv) {
 
   fclose(fd);
 
-  // 3. wait for clients
-  printf("Waiting for clients...\n");
+  /* 2.x run client #0: pautina_config */
+  exec_pautina_config();
 
-  // 1. create
+  /* 3 sockets */
+  /* 3.1 create */
   int srvSock = socket(AF_UNIX, SOCK_STREAM, 0);
   if(srvSock == -1)
-    error(1, errno, "socket() failed");
+    ERROR(1, errno, "socket() failed");
 
-  // 2. bind
+  /* 3.2 bind */
   struct sockaddr_un addr;
   memset(&addr, 0, sizeof(addr));
   addr.sun_family = AF_UNIX;
   strncpy(addr.sun_path, sock_fname, sizeof(addr.sun_path) - 1);
   if (bind(srvSock, (struct sockaddr *) &addr, sizeof(addr)) == -1)
-    error(1, errno, "bind() failed");
+    ERROR(1, errno, "bind() failed");
 
-  // 3. listen
+  /* 3.3 listen */
   if(listen(srvSock, NSOCKS_MAX - 1) == -1)
-    error(1, errno, "listen() failed");
+    ERROR(1, errno, "listen() failed");
 
   pollfds[0].fd = srvSock;
   pollfds[0].events = POLLIN;
 
-  printf("going to accept...\n");
+  /* 3.4 wait for clients */
+  printf("Waiting for clients...\n");
   // wait
   if(-1 == poll(pollfds, nSocks, -1))
-    error(1, errno, "poll() failed");
+    ERROR(1, errno, "poll() failed");
   printf("done\n");
 
   acceptClient();
 
+  /* 4. init up- and downstream submodules */
   printf("dram_segstart: %p\n", dram_segstart);
-  // 4. init up- and downstream submodules
   init_tlp_up(dram_segstart, DRAM_SEGSIZE);
 
-  // 5.1 run simulator
-  pid_t pid = dbg->count == 0 ? fork() : 0; /* do not fork() nor cleaup in debug
-                                               mode */
-  if(pid == 0) {
+  /* 5. run simulator */
+  /* 5.1 fork() */
+  const pid_t pid_sim = dbg->count == 0 ? fork() : 0; /* do not fork() nor cleaup in debug
+                                                         mode */
+  if(pid_sim == 0) {
     // disable annoying ieee asserts by default
     ghdl_argc++;
     char ** const ghdl_argv_1 = (char**)malloc(sizeof(char*)*ghdl_argc);
@@ -284,44 +288,48 @@ int main (int argc, char **argv) {
       ghdl_argv_1[i] = ghdl_argv[i-1];
 
     return ghdl_main(ghdl_argc, ghdl_argv_1);
-  } else if(pid == -1)
-    error(1, errno, "fork() failed");
+  } else if(pid_sim == -1)
+    ERROR(1, errno, "fork() failed");
 
-  // 5.2 parent process case; wait for child
+  /* 5.2 wait for child */
   int status;
-  if(-1 == wait(&status))
-    error(1, errno, "wait() failed");
+  const pid_t pid_cld = wait(&status);
+  if(pid_cld == -1)
+    ERROR(1, errno, "wait() failed");
+  else if(pid_cld == pid_pc) {
+    /* NB: don't expect pautina_config to exit */
+    ERROR(1, 0, "pautina_config exited, status: %d, %d\n", status, WEXITSTATUS(status));
+  } else if(pid_cld != pid_sim) {
+    ERROR(1, 0, "wait(): unknown child %d, status: %d, %d\n", pid_cld, status, WEXITSTATUS(status));
+  }
 
   printf("simulator exited, status: %d, %d\n", status, WEXITSTATUS(status));
 
-  // 6. finalize
+  /* 6. finalize */
   {
-    size_t i;
+    kill_pautina_config();
 
+    size_t i;
     for(i=0; i<nSocks; ++i)
       if(close(pollfds[i].fd) == -1)
-        error(1, errno, "socket close() failed");
+        ERROR(1, errno, "socket close() failed");
 
     if(unlink(sock_fname) == -1)
-      error(1, errno, "failed to unlink() unix socket %s", sock_fname);
+      ERROR(1, errno, "failed to unlink() unix socket %s", sock_fname);
 
     unlink(pid_fname);
-
     munmap(dram_segstart, DRAM_SEGSIZE);
-
     close(dram_shm_fd);
-
     shm_unlink(dram_fname);
   }
 
-  //return retval;
-  return 0;
+  return 0/* status */;
 }
 
 
 void acceptClient() {
   if(nSocks >= NSOCKS_MAX)
-    error(1, 0, "too many clients");
+    ERROR(1, 0, "too many clients");
 
   // 4. accept
   int cliSock = accept(pollfds[0].fd, NULL, NULL);
