@@ -51,6 +51,7 @@ void line256_down(line_down_scalars_t *bar, ast256_t *ast, ast_bp_t *ast_bp) {
   static size_t count = 0;
   static size_t nLines = /* some meaningless value */-1;
   static size_t payload_qw_end;
+  static uint32_t hash = 0;
 
   if(count == 0) {
     char * buf = (char *)&p;
@@ -96,7 +97,7 @@ void line256_down(line_down_scalars_t *bar, ast256_t *ast, ast_bp_t *ast_bp) {
 
   if(count == 0) {
     /* issue header */
-
+    ++hash;
     payload_qw_end = 0; /* no payload by default */
 
     switch(p.kind) {
@@ -143,7 +144,7 @@ void line256_down(line_down_scalars_t *bar, ast256_t *ast, ast_bp_t *ast_bp) {
     /* payload */
     memcpy(ast->data + 4, p.bdata, 16);
 
-    show_tlp_head("DOWN:", nLines, head);
+    show_tlp_head("DN", hash, nLines, head);
   } else {
     /* payload */
     memcpy(ast->data, p.bdata + 16 + 32 * (count - 1), 32);
@@ -152,7 +153,7 @@ void line256_down(line_down_scalars_t *bar, ast256_t *ast, ast_bp_t *ast_bp) {
   ast->valid = stdl_1;
   ast->sop = count == 0 ? stdl_1 : stdl_0;
 
-  show_line256("DOWN: ", ast, count, payload_qw_end);
+  show_line256("DN", hash, ast, count, payload_qw_end);
 
   ++count;
 

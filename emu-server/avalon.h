@@ -39,9 +39,9 @@ void line128_up(std_logic tx_dvalid, const uint32_t arr[4]);
 void line256_down(line_down_scalars_t *bar, ast256_t *ast, ast_bp_t *ast_bp);
 void line256_up(const ast256_t *ast);
 
-static void show_line256(const char *prefix, const ast256_t *ast, size_t line_count, size_t payload_qw_end) {
+static void show_line256(const char *prefix, uint32_t hash, const ast256_t *ast, size_t line_count, size_t payload_qw_end) {
   int i;
-  printf("%s %d %d ", prefix, line_count, payload_qw_end);
+  printf("%s-%08x: ", prefix, hash);
   for(i=3;i>=0;--i) {
     const size_t payload_qw_cnt = line_count * 4 + i;
     /* colorize payload */
