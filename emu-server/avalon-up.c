@@ -18,8 +18,6 @@
 #include <ghdl-bindings.h>
 #include <socket-util.h>
 #include <avalon.h>
-#include <exec-pautina-config.h>
-
 
 #define sfence() asm volatile ("sfence":::"memory")
 
@@ -103,7 +101,7 @@ void line256_up(const ast256_t *ast) {
         token_t token = head.cpl.dw2.s.tag & 0xFF;
         rreq_item_t *item = rreq_find(token);
         if(NULL == item)
-          ERROR(1, 0, "a reply to an unknown read request");
+          error(1, 0, "a reply to an unknown read request");
 
         assert(item->nBytes == p_nBytes);
         size_t clientId = (size_t)item->clientId;
@@ -116,7 +114,7 @@ void line256_up(const ast256_t *ast) {
       break;
 
     default:
-      ERROR(1, 0, "packet kind not implemented");
+      error(1, 0, "packet kind not implemented");
     }
 
     count = 0;
@@ -124,9 +122,9 @@ void line256_up(const ast256_t *ast) {
 }
 
 void line64_up(std_logic tx_dvalid, const uint32_t arr[2]) {
-  ERROR(1, 0, "line64_up() not implemented");
+  error(1, 0, "line64_up() not implemented");
 }
 
 void line128_up(std_logic tx_dvalid, const uint32_t arr[4]) {
-  ERROR(1, 0, "line128_up() not implemented");
+  error(1, 0, "line128_up() not implemented");
 }

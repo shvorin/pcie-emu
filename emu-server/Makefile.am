@@ -3,7 +3,7 @@
 
 lib_LIBRARIES = libemu-server.a
 
-libemu_server_a_SOURCES = emu-server.c avalon-up.c avalon-down.c rreq-storage.c exec-pautina-config.c
+libemu_server_a_SOURCES = emu-server.c avalon-up.c avalon-down.c rreq-storage.c
 
 AM_CPPFLAGS = -I$(top_srcdir)/../include
 

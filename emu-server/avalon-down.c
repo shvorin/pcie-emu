@@ -18,15 +18,13 @@
 #include <socket-util.h>
 #include <avalon.h>
 #include <rreq-storage.h>
-#include <exec-pautina-config.h>
-
 
 static int pollin_revent(short revent) {
   if(revent & POLLERR)
-    ERROR(1, 0, "POLLERR in poll()", revent);
+    error(1, 0, "POLLERR in poll()", revent);
 
   if(revent & POLLHUP)
-    ERROR(1, 0, "client hangup; cleanup not implemented", revent);
+    error(1, 0, "client hangup; cleanup not implemented", revent);
 
   if(0 == revent)
     return 0;
@@ -34,7 +32,7 @@ static int pollin_revent(short revent) {
   if(POLLIN == revent)
     return 1;
 
-  ERROR(1, 0, "unexpected result in poll()");
+  error(1, 0, "unexpected result in poll()");
   return 0;
 }
 
@@ -62,7 +60,7 @@ void line256_down(line_down_scalars_t *bar, ast256_t *ast, ast_bp_t *ast_bp) {
     int res = poll(pollfds, nSocks, 0);
 
     if(-1 == res)
-      ERROR(1, errno, "poll() failed");
+      error(1, errno, "poll() failed");
 
     if(pollin_revent(pollfds[0].revents)) {
       acceptClient();
@@ -136,7 +134,7 @@ void line256_down(line_down_scalars_t *bar, ast256_t *ast, ast_bp_t *ast_bp) {
       break;
 
     default:
-      ERROR(1, 0, "not implemented packet kind");
+      error(1, 0, "not implemented packet kind");
     }
 
     /* tlp header */
@@ -167,9 +165,9 @@ void line256_down(line_down_scalars_t *bar, ast256_t *ast, ast_bp_t *ast_bp) {
 }
 
 void line128_down(bits_down_t *bits, uint32_t arr[4]) {
-  ERROR(1, 0, "line128_down() not implemented");
+  error(1, 0, "line128_down() not implemented");
 }
 
 void line64_down(bits_down_t *bits, uint32_t arr[2]) {
-  ERROR(1, 0, "line64_down() not implemented");
+  error(1, 0, "line64_down() not implemented");
 }

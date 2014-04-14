@@ -20,8 +20,12 @@
 #include <emu-server.h>
 #include <socket-util.h>
 #include <bar-defs.h>
-#include <exec-pautina-config.h>
 
+
+#define ERROR(status, errnum, ...)                                  \
+  do {                                                              \
+    error_at_line(status, errnum, __FILE__, __LINE__, __VA_ARGS__); \
+  } while(0)
 
 void init_tlp_up(char * dram_segment, size_t _dram_segsize);
 
@@ -106,6 +110,37 @@ static void usage(void **argtable, const char *progname) {
   printf("\n*** Emu server section\n");
   arg_print_glossary(stdout, argtable,"  %-25s %s\n");
 }
+
+static pid_t pid_pc = 0;
+
+static void exec_pautina_config() {
+  const pid_t pid = fork();
+  if(pid == 0) {
+    setenv("EMU", "", 0);
+    const char path[] = "../../fpga-software/bin/pautina-config"; /* FIXME: ad hoc */
+    int res = execl(path, path, "-c", "-a", "0x10000000", "-l", "0x10000000", (char*)NULL);
+    if(-1 == res)
+      error(1, errno, "exec failed");
+  } else if(pid == -1)
+    error(1, errno, "fork() failed");
+
+   pid_pc = pid;
+}
+
+static void kill_pautina_config() {
+  if(!pid_pc)
+    return;
+
+  int res, status;
+  res = kill(pid_pc, SIGTERM);
+  if(-1 == res)
+    error(1, errno, "kill pautina-config failed, pid_pc: %d\n", pid_pc);
+
+  const pid_t pid_cld = wait(&status);
+  if(pid_cld != pid_pc)
+    error(1, errno, "wait for pautina-config failed, pid_pc: %d, pid_cld: %d\n", pid_pc, pid_cld);
+}
+
 
 int main (int argc, char **argv) {
   /* 0. Parse command line arguments */
@@ -307,8 +342,6 @@ int main (int argc, char **argv) {
 
   /* 6. finalize */
   {
-    kill_pautina_config();
-
     size_t i;
     for(i=0; i<nSocks; ++i)
       if(close(pollfds[i].fd) == -1)
@@ -350,4 +383,10 @@ void acceptClient() {
 
   printf("A client #%lu connected!\n", nSocks);
   ++nSocks;
+}
+
+__attribute__((destructor))
+static void finalize() {
+  printf("emu-server finalize\n");
+  kill_pautina_config();
 }
