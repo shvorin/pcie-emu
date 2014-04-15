@@ -5,6 +5,8 @@
 #define AVALON_H
 
 #include <ghdl-bindings.h>
+#include <tlp-defs.h>
+#include <stdint.h>
 
 extern int stdout_isatty;
 
@@ -39,19 +41,18 @@ void line128_up(std_logic tx_dvalid, const uint32_t arr[4]);
 void line256_down(line_down_scalars_t *bar, ast256_t *ast, ast_bp_t *ast_bp);
 void line256_up(const ast256_t *ast);
 
-static void show_line256(const char *prefix, uint32_t hash, const ast256_t *ast, size_t line_count, size_t payload_qw_end) {
-  int i;
-  printf("%s-%08x: ", prefix, hash);
-  for(i=3;i>=0;--i) {
-    const size_t payload_qw_cnt = line_count * 4 + i;
-    /* colorize payload */
-    const int colored = stdout_isatty
-      && payload_qw_cnt >= 2 && payload_qw_cnt < payload_qw_end;
-    const char *fmt = colored ? "\e[0;32m%016lX \e[0m" : "%016lX ";
+typedef struct {
+  char * const start;
+  const char * const end;
+  char *curr;
+} streambuf_t;
 
-    printf(fmt, *((uint64_t*)(ast->data+2*i)));
-  }
-  printf("\n");
+static void bufrewind(streambuf_t *sbuf) {
+  sbuf->curr = sbuf->start;
 }
+
+int bufprintf(streambuf_t *sbuf, const char *fmt, ...);
+void bufshow_line256(streambuf_t *sbuf, const ast256_t *ast, size_t line_count, size_t payload_qw_end);
+void bufshow_tlp_head(streambuf_t *sbuf, size_t nLines, tlp_header head);
 
 #endif /* AVALON_H */

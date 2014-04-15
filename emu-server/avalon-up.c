@@ -54,12 +54,15 @@ void line256_up(const ast256_t *ast) {
   static char p_bdata[1024]; // FIXME: ad hoc
   static tlp_header head;
   static size_t payload_qw_end;
-  static uint32_t hash = 0;
+
+  static char yyy[1024];
+  static streambuf_t streambuf = {.start = yyy, .end = yyy + sizeof(yyy)};
 
   ++count;
 
   if(1 == count) /* header arrived */{
-    ++hash;
+    bufrewind(&streambuf);
+
     memcpy(&head, ast->data, sizeof(head));
 
     /* aligned data expected  */
@@ -68,7 +71,7 @@ void line256_up(const ast256_t *ast) {
     /* hhhhdddd, dddddddd, ... */
     nLines = (head.rw.dw0.s.len + 3)/8 + 1;
 
-    show_tlp_head("UP", hash, nLines, head);
+    bufshow_tlp_head(&streambuf, nLines, head);
 
     /* payload */
     memcpy(p_bdata, ast->data + 4, 16);
@@ -87,9 +90,11 @@ void line256_up(const ast256_t *ast) {
     memcpy(p_bdata + 16 + 32 * (count - 2), ast->data, 32);
   }
 
-  show_line256("UP", hash, ast, count - 1 /* NB */, payload_qw_end);
+  bufshow_line256(&streambuf, ast, count, payload_qw_end);
 
   if(nLines == count) /* tail arriverd */ {
+    printf("UP: %s\n", streambuf.start);
+
     size_t p_nBytes = head.rw.dw0.s.len * 4;
 
     switch(parse_type(head)) {
