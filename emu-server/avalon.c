@@ -25,13 +25,19 @@ int bufprintf(streambuf_t *sbuf, const char *fmt, ...) {
 
 
 void bufshow_line256(streambuf_t *sbuf, const ast256_t *ast, size_t line_count, size_t payload_qw_end) {
+  char *fmt;
   int i;
-  for(i=3;i>=0;--i) {
+  for(i=0;i<4;++i) {
     const size_t payload_qw_cnt = line_count * 4 + i;
-    /* colorize payload */
-    const int colored = stdout_isatty
-      && payload_qw_cnt >= 2 && payload_qw_cnt < payload_qw_end;
-    const char *fmt = colored ? "\e[0;32m%016lX \e[0m" : "%016lX ";
+    if (payload_qw_cnt < 2 && stdout_isatty) {
+      /* TLP head */
+      fmt = "\e[0;31m%016lX \e[0m";
+    } else if(payload_qw_cnt < payload_qw_end && stdout_isatty) {
+      /* TLP payload  */
+      fmt = "\e[0;32m%016lX \e[0m";
+    } else {
+      fmt = "%016lX ";
+    }
 
     bufprintf(sbuf, fmt, *((uint64_t*)(ast->data+2*i)));
   }
