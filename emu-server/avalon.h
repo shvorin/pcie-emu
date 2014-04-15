@@ -8,7 +8,7 @@
 #include <tlp-defs.h>
 #include <stdint.h>
 
-extern int stdout_isatty;
+extern int colorized_output;
 
 typedef struct {
   std_logic dvalid;

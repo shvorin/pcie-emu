@@ -45,7 +45,7 @@ static const size_t nBars = sizeof(bars)/sizeof(bar_t);
 // config parameters
 const size_t qcapacity = 10;
 
-int stdout_isatty;
+int colorized_output = 0;
 
 static int dram_shm_fd;
 
@@ -150,8 +150,9 @@ int main (int argc, char **argv) {
 
   struct arg_str *id = arg_str0(NULL, "id", "<ID>", "emu server instance id");
   struct arg_lit *dbg = arg_lit0(NULL, "dbg,debug", "debug mode: do not fork() for cleanup");
+  struct arg_rex *color = arg_rex0(NULL, "color", "\\(never\\)\\|\\(always\\)\\|\\(auto\\)", "never|always|auto", 0, "colorized output");
 
-  void *argtable[] = {id, dbg, help, end};
+  void *argtable[] = {id, dbg, color, help, end};
 
   /* 0.0. Check for '--help' global option */
   {
@@ -200,7 +201,22 @@ int main (int argc, char **argv) {
       /* Display the error details contained in the arg_end struct.*/
       arg_print_errors(stdout, end, argv[0]);
       printf("try '%s --help'", argv[0]);
+      return 1;
     }
+
+    if(color->count > 0) {
+      const char *col_string = color->sval[color->count - 1];
+      if(0 == strcmp(col_string, "never"))
+        colorized_output = 0;
+      else if(0 == strcmp(col_string, "always"))
+        colorized_output = 1;
+      else if(0 == strcmp(col_string, "auto"))
+        colorized_output = isatty(fileno(stdout));
+    } else {
+      /* auto by default */
+      colorized_output = isatty(fileno(stdout));
+    }
+      
   }
 
   /* 0.3. make aliases */
@@ -223,8 +239,6 @@ int main (int argc, char **argv) {
   snprintf(dram_fname, sizeof(dram_fname), "/emu.%s.shm-dram", instanceId);
 
   nSocks = 1; // only a server
-
-  stdout_isatty = isatty(fileno(stdout));
 
   /* 1. check locks */
   {

@@ -29,10 +29,10 @@ void bufshow_line256(streambuf_t *sbuf, const ast256_t *ast, size_t line_count, 
   int i;
   for(i=0;i<4;++i) {
     const size_t payload_qw_cnt = line_count * 4 + i;
-    if (payload_qw_cnt < 2 && stdout_isatty) {
+    if (payload_qw_cnt < 2 && colorized_output) {
       /* TLP head */
       fmt = "\e[0;31m%016lX \e[0m";
-    } else if(payload_qw_cnt < payload_qw_end && stdout_isatty) {
+    } else if(payload_qw_cnt < payload_qw_end && colorized_output) {
       /* TLP payload  */
       fmt = "\e[0;32m%016lX \e[0m";
     } else {
