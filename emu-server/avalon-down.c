@@ -160,7 +160,8 @@ void line256_down(line_down_scalars_t *bar, ast256_t *ast, ast_bp_t *ast_bp) {
   ++count;
 
   if(count == nLines) {
-    printf("DN: %s\n", streambuf.start);
+    if(!tlp_quiet)
+      printf("DN: %s\n", streambuf.start);
 
     count = 0;
     ast->eop = stdl_1;

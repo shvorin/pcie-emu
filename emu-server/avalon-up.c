@@ -93,7 +93,8 @@ void line256_up(const ast256_t *ast) {
   bufshow_line256(&streambuf, ast, count - 1, payload_qw_end);
 
   if(nLines == count) /* tail arriverd */ {
-    printf("UP: %s\n", streambuf.start);
+    if(!tlp_quiet)
+      printf("UP: %s\n", streambuf.start);
 
     size_t p_nBytes = head.rw.dw0.s.len * 4;
 

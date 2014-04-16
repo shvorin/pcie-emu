@@ -9,6 +9,7 @@
 #include <stdint.h>
 
 extern int colorized_output;
+extern int tlp_quiet;
 
 typedef struct {
   std_logic dvalid;

@@ -46,6 +46,7 @@ static const size_t nBars = sizeof(bars)/sizeof(bar_t);
 const size_t qcapacity = 10;
 
 int colorized_output = 0;
+int tlp_quiet = 0;
 
 static int dram_shm_fd;
 
@@ -152,8 +153,9 @@ int main (int argc, char **argv) {
   struct arg_str *id = arg_str0(NULL, "id", "<ID>", "emu server instance id");
   struct arg_lit *dbg = arg_lit0(NULL, "dbg,debug", "debug mode: do not fork() for cleanup");
   struct arg_rex *color = arg_rex0(NULL, "color", "\\(^never$\\)\\|\\(^always$\\)\\|\\(^auto&\\)", "never|always|auto", 0, "colorized output");
+  struct arg_lit *quiet = arg_lit0("q", "quiet", "do not show TLP stream");
 
-  void *argtable[] = {id, dbg, color, help, end};
+  void *argtable[] = {id, dbg, color, quiet, help, end};
 
   /* 0.0. Check for '--help' global option */
   {
@@ -217,7 +219,9 @@ int main (int argc, char **argv) {
       /* auto by default */
       colorized_output = isatty(fileno(stdout));
     }
-      
+
+    if(quiet->count > 0)
+      tlp_quiet = 1;
   }
 
   /* 0.3. make aliases */
