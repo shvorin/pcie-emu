@@ -150,7 +150,7 @@ int main (int argc, char **argv) {
 
   struct arg_str *id = arg_str0(NULL, "id", "<ID>", "emu server instance id");
   struct arg_lit *dbg = arg_lit0(NULL, "dbg,debug", "debug mode: do not fork() for cleanup");
-  struct arg_rex *color = arg_rex0(NULL, "color", "\\(never\\)\\|\\(always\\)\\|\\(auto\\)", "never|always|auto", 0, "colorized output");
+  struct arg_rex *color = arg_rex0(NULL, "color", "\\(^never$\\)\\|\\(^always$\\)\\|\\(^auto&\\)", "never|always|auto", 0, "colorized output");
 
   void *argtable[] = {id, dbg, color, help, end};
 
