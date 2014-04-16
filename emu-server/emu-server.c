@@ -113,10 +113,11 @@ static void usage(void **argtable, const char *progname) {
 
 static pid_t pid_pc = 0;
 
-static void exec_pautina_config() {
+static void exec_pautina_config(const char *instanceId) {
   const pid_t pid = fork();
   if(pid == 0) {
     setenv("EMU", "", 0);
+    setenv("SKIF_EMU_ID", instanceId, 1);
     const char path[] = "../../fpga-software/bin/pautina-config"; /* FIXME: ad hoc */
     int res = execl(path, path, "-c", "-a", "0x10000000", "-l", "0x10000000", (char*)NULL);
     if(-1 == res)
@@ -286,7 +287,7 @@ int main (int argc, char **argv) {
   fclose(fd);
 
   /* 2.x run client #0: pautina_config */
-  exec_pautina_config();
+  exec_pautina_config(instanceId);
 
   /* 3 sockets */
   /* 3.1 create */
