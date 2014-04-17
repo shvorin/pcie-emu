@@ -15,7 +15,7 @@
 #include <errno.h>
 #include <argtable2.h>
 #include <sys/wait.h>
-#include <poll.h>
+#include <pollpull.h>
 
 #include <emu-server.h>
 #include <socket-util.h>
@@ -51,8 +51,7 @@ struct emu_config_t emu_config = {
 
 static int dram_shm_fd;
 
-struct pollfd pollfds[NSOCKS_MAX];
-size_t nSocks;
+struct pollpull_t pollpull = {0}; /* NB: nullify! */
 
 int ghdl_main(int argc, char **argv);
 void grt__options__help();
@@ -244,8 +243,6 @@ int main (int argc, char **argv) {
   char dram_fname[100];
   snprintf(dram_fname, sizeof(dram_fname), "/emu.%s.shm-dram", instanceId);
 
-  nSocks = 1; // only a server
-
   /* 1. check locks */
   {
     const pid_t pid = getpid();
@@ -309,20 +306,23 @@ int main (int argc, char **argv) {
     ERROR(1, errno, "bind() failed");
 
   /* 3.3 listen */
-  if(listen(srvSock, NSOCKS_MAX - 1) == -1)
+  if(listen(srvSock, /* FIXME: ad hoc client queue length */10) == -1)
     ERROR(1, errno, "listen() failed");
 
-  pollfds[0].fd = srvSock;
-  pollfds[0].events = POLLIN;
+  ssize_t srv_idx = alloc_pollfd(srvSock);
+  if(0 != srv_idx)
+    ERROR(1, 0, "oops, something wrong with pollpull");
 
   /* 3.4 wait for clients */
   printf("Waiting for clients...\n");
-  // wait
-  if(-1 == poll(pollfds, nSocks, -1))
-    ERROR(1, errno, "poll() failed");
-  printf("done\n");
+  select_pollfd(/* infinite timeout */-1);
+  /* // wait */
+  /* if(-1 == poll_pollfd(-1)) */
+  /*   ERROR(1, errno, "poll() failed"); */
 
-  acceptClient();
+  /* printf("done\n"); */
+
+  /* acceptClient(); */
 
   /* 4. init up- and downstream submodules */
   printf("dram_segstart: %p\n", dram_segstart);
@@ -362,10 +362,12 @@ int main (int argc, char **argv) {
 
   /* 6. finalize */
   {
+#if 0
     size_t i;
     for(i=0; i<nSocks; ++i)
       if(close(pollfds[i].fd) == -1)
         ERROR(1, errno, "socket close() failed");
+#endif
 
     if(unlink(sock_fname) == -1)
       ERROR(1, errno, "failed to unlink() unix socket %s", sock_fname);
@@ -379,13 +381,9 @@ int main (int argc, char **argv) {
   return 0/* status */;
 }
 
-
 void acceptClient() {
-  if(nSocks >= NSOCKS_MAX)
-    ERROR(1, 0, "too many clients");
-
   // 4. accept
-  int cliSock = accept(pollfds[0].fd, NULL, NULL);
+  int cliSock = accept(pollpull.fds[0].fd, NULL, NULL);
 
   // 5. send
   Socket_SendValue(cliSock, emu_config.qcapacity);
@@ -396,17 +394,20 @@ void acceptClient() {
   for(i=0; i<nBars; ++i)
     Socket_SendValue(cliSock, bars[i]);
 
-  pollfds[nSocks].fd = cliSock;
-  pollfds[nSocks].events = POLLIN;
+  ssize_t cli_idx = alloc_pollfd(cliSock);
+  if(-1 == cli_idx)
+    ERROR(1, 0, "failed to alloc in pollpull");
 
-  Socket_SendValue(cliSock, nSocks);
+  Socket_SendValue(cliSock, cli_idx);
 
-  printf("A client #%lu connected!\n", nSocks);
-  ++nSocks;
+  printf("A client #%lu connected!\n", cli_idx);
 }
+
 
 __attribute__((destructor))
 static void finalize() {
   printf("emu-server finalize\n");
   kill_pautina_config();
+
+  free(pollpull.fds);
 }

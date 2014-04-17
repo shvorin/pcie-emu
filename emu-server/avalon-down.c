@@ -16,25 +16,10 @@
 #include <emu-server.h>
 #include <ghdl-bindings.h>
 #include <socket-util.h>
+#include <pollpull.h>
 #include <avalon.h>
 #include <rreq-storage.h>
 
-static int pollin_revent(short revent) {
-  if(revent & POLLERR)
-    error(1, 0, "POLLERR in poll()", revent);
-
-  if(revent & POLLHUP)
-    error(1, 0, "client hangup; cleanup not implemented", revent);
-
-  if(0 == revent)
-    return 0;
-
-  if(POLLIN == revent)
-    return 1;
-
-  error(1, 0, "unexpected result in poll()");
-  return 0;
-}
 
 void line256_down(line_down_scalars_t *bar, ast256_t *ast, ast_bp_t *ast_bp) {
   ast->empty[0] = ast->empty[1] = stdl_0; /* FIXME */
@@ -47,7 +32,6 @@ void line256_down(line_down_scalars_t *bar, ast256_t *ast, ast_bp_t *ast_bp) {
 #endif
 
   static TlpPacket p;
-  static size_t hp = 1;
   static size_t count = 0;
   static size_t nLines = /* some meaningless value */-1;
   static size_t payload_qw_end;
@@ -59,38 +43,14 @@ void line256_down(line_down_scalars_t *bar, ast256_t *ast, ast_bp_t *ast_bp) {
     char * buf = (char *)&p;
     size_t len = sizeof(TlpPacket);
 
-    int nSocks0 = nSocks;
-    int res = poll(pollfds, nSocks, 0);
+    ssize_t selected = select_pollfd(/* zero timeout */0);
 
-    if(-1 == res)
-      error(1, errno, "poll() failed");
-
-    if(pollin_revent(pollfds[0].revents)) {
-      acceptClient();
-
-      --res;
-      --nSocks0;
-    }
-
-    if(0 == res) {
+    if(selected > 0) {
+      Socket_Recv(pollpull.fds[selected].fd, buf, len);
+    } else {
       ast->valid = ast->sop = ast->eop = stdl_0;
       return;
     }
-
-    size_t selected;
-    for(selected = hp; selected <= nSocks0; ++selected)
-      if(pollin_revent(pollfds[selected].revents))
-        goto selected_found;
-
-    for(selected = 1; selected < hp ; ++selected)
-      if(pollin_revent(pollfds[selected].revents))
-        goto selected_found;
-
-    assert(0);
-
-  selected_found:
-    Socket_Recv(pollfds[selected].fd, buf, len);
-    hp = selected < nSocks ? selected + 1 : 1;
   }
 
   bar->bar_num = p.bar_num;

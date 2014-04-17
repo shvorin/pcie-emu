@@ -4,15 +4,10 @@
 #ifndef EMU_SERVER_H
 #define EMU_SERVER_H
 
+#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <poll.h>
 
-
-#define NSOCKS_MAX 10
-
-extern struct pollfd pollfds[NSOCKS_MAX];
-extern size_t nSocks;
 
 extern struct emu_config_t {
   const char *instanceId;
@@ -20,8 +15,6 @@ extern struct emu_config_t {
   int colorized_output;
   int tlp_quiet;
 } emu_config;
-
-void acceptClient();
 
 
 #endif /* EMU_SERVER_H */

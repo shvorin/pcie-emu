@@ -17,6 +17,7 @@
 #include <rreq-storage.h>
 #include <ghdl-bindings.h>
 #include <socket-util.h>
+#include <pollpull.h>
 #include <avalon.h>
 
 #define sfence() asm volatile ("sfence":::"memory")
@@ -114,7 +115,8 @@ void line256_up(const ast256_t *ast) {
         assert(item->nBytes == p_nBytes);
         size_t clientId = (size_t)item->clientId;
         /* TODO: the send may fail since client's timeout exhausted */
-        Socket_Send(pollfds[clientId].fd, p_bdata, p_nBytes);
+        /* Socket_Send(pollfds[clientId].fd, p_bdata, p_nBytes); */
+        Socket_Send(pollpull.fds[clientId].fd, p_bdata, p_nBytes);
 
         rreq_delete(token);
         free(item);
