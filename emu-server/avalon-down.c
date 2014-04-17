@@ -160,7 +160,7 @@ void line256_down(line_down_scalars_t *bar, ast256_t *ast, ast_bp_t *ast_bp) {
   ++count;
 
   if(count == nLines) {
-    if(!tlp_quiet)
+    if(!emu_config.tlp_quiet)
       printf("DN: %s\n", streambuf.start);
 
     count = 0;

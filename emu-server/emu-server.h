@@ -14,6 +14,13 @@
 extern struct pollfd pollfds[NSOCKS_MAX];
 extern size_t nSocks;
 
+extern struct emu_config_t {
+  const char *instanceId;
+  size_t qcapacity;
+  int colorized_output;
+  int tlp_quiet;
+} emu_config;
+
 void acceptClient();
 
 

@@ -42,11 +42,12 @@ static const bar_t bars[] = {
 
 static const size_t nBars = sizeof(bars)/sizeof(bar_t);
 
-// config parameters
-const size_t qcapacity = 10;
-
-int colorized_output = 0;
-int tlp_quiet = 0;
+struct emu_config_t emu_config = {
+  .instanceId = "0",
+  .qcapacity = 10, /* ad hoc */
+  .colorized_output = 0,
+  .tlp_quiet = 0,
+};
 
 static int dram_shm_fd;
 
@@ -210,18 +211,18 @@ int main (int argc, char **argv) {
     if(color->count > 0) {
       const char *col_string = color->sval[color->count - 1];
       if(0 == strcmp(col_string, "never"))
-        colorized_output = 0;
+        emu_config.colorized_output = 0;
       else if(0 == strcmp(col_string, "always"))
-        colorized_output = 1;
+        emu_config.colorized_output = 1;
       else if(0 == strcmp(col_string, "auto"))
-        colorized_output = isatty(fileno(stdout));
+        emu_config.colorized_output = isatty(fileno(stdout));
     } else {
       /* auto by default */
-      colorized_output = isatty(fileno(stdout));
+      emu_config.colorized_output = isatty(fileno(stdout));
     }
 
     if(quiet->count > 0)
-      tlp_quiet = 1;
+      emu_config.tlp_quiet = 1;
   }
 
   /* 0.3. make aliases */
@@ -387,7 +388,7 @@ void acceptClient() {
   int cliSock = accept(pollfds[0].fd, NULL, NULL);
 
   // 5. send
-  Socket_SendValue(cliSock, qcapacity);
+  Socket_SendValue(cliSock, emu_config.qcapacity);
 
   Socket_SendValue(cliSock, nBars);
 

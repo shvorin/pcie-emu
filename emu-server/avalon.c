@@ -7,6 +7,7 @@
 #include <stdarg.h>
 
 #include <avalon.h>
+#include <emu-server.h>
 
 int bufprintf(streambuf_t *sbuf, const char *fmt, ...) {
   const int size = sbuf->end - sbuf->curr;
@@ -25,15 +26,15 @@ int bufprintf(streambuf_t *sbuf, const char *fmt, ...) {
 
 
 void bufshow_line256(streambuf_t *sbuf, const ast256_t *ast, size_t line_count, size_t payload_qw_end) {
-  if(tlp_quiet) return;
+  if(emu_config.tlp_quiet) return;
   char *fmt;
   int i;
   for(i=0;i<4;++i) {
     const size_t payload_qw_cnt = line_count * 4 + i;
-    if (payload_qw_cnt < 2 && colorized_output) {
+    if (payload_qw_cnt < 2 && emu_config.colorized_output) {
       /* TLP head */
       fmt = "\e[0;31m%016lX \e[0m";
-    } else if(payload_qw_cnt < payload_qw_end && colorized_output) {
+    } else if(payload_qw_cnt < payload_qw_end && emu_config.colorized_output) {
       /* TLP payload  */
       fmt = "\e[0;32m%016lX \e[0m";
     } else {
@@ -45,7 +46,7 @@ void bufshow_line256(streambuf_t *sbuf, const ast256_t *ast, size_t line_count, 
 }
 
 void bufshow_tlp_head(streambuf_t *sbuf, size_t nLines, tlp_header head) {
-  if(tlp_quiet) return;
+  if(emu_config.tlp_quiet) return;
 
   const int len = head.rw.dw0.s.len & 0x3FF; /* len:10 */
   const int bc = len << 2; /* byte count */
