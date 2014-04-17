@@ -3,6 +3,9 @@
 
 bin_PROGRAMS = emu_top
 
+# FIXME: $(EMU_PATH) must be configured before running this makefile
+SUBDIRS = $(EMU_PATH)
+
 GHDL_LINKER_FLAGS = -Wl,-L$(EMU_PATH) -Wl,-lemu-server -Wl,-largtable2 -Wl,-lrt -o emu_top
 
 QSF_PATH = $(top_srcdir)/$(QSF_FILE)
