@@ -126,7 +126,7 @@ static void exec_pautina_config(const char *instanceId) {
   if(pid == 0) {
     setenv("EMU", "", 0);
     setenv("EMU_HIDDEN", "", 0);
-    setenv("SKIF_EMU_ID", instanceId, 1);
+    setenv("EMU_ID", instanceId, 1);
     const char path[] = "../../fpga-software/bin/pautina-config"; /* FIXME: ad hoc */
     int res = execl(path, path, "-c", "-a", "0x10000000", "-l", "0x10000000", (char*)NULL);
     if(-1 == res)
