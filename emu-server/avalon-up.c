@@ -11,7 +11,7 @@
 #include <error.h>
 #include <errno.h>
 
-#include <tlp-defs-old.h>
+#include <emu-common.h>
 #include <tlp-defs.h>
 #include <emu-server.h>
 #include <rreq-storage.h>

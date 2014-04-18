@@ -10,7 +10,7 @@
 #include <error.h>
 
 #include <pollpull.h>
-#include <tlp-defs-old.h>
+#include <emu-common.h>
 
 
 struct pollpull_t pollpull = {0}; /* NB: nullify! */

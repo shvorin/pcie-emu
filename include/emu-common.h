@@ -1,8 +1,8 @@
 /* Copyright (c) 2011-2014, Ailamazyan Program Systems Institute (Russian             
  * Academy of Science). See COPYING in top-level directory. */
 
-#ifndef TLP_DEFS_OLD_H
-#define TLP_DEFS_OLD_H
+#ifndef EMU_COMMON_H
+#define EMU_COMMON_H
 
 #include <stdint.h>
 
@@ -24,4 +24,4 @@ typedef struct {
 
 enum {PROP_HIDDEN = 0x1};
 
-#endif /* TLP_DEFS_OLD_H */
+#endif /* EMU_COMMON_H */

@@ -20,7 +20,7 @@
 #include <emu-server.h>
 #include <socket-util.h>
 #include <bar-defs.h>
-#include <tlp-defs-old.h>
+#include <emu-common.h>
 
 
 #define ERROR(status, errnum, ...)                                  \
