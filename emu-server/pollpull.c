@@ -11,11 +11,12 @@
 
 #include <pollpull.h>
 #include <emu-common.h>
+#include <emu-server.h>
 
 
 struct pollpull_t pollpull = {0}; /* NB: nullify! */
 
-ssize_t pp_alloc(int sock, int prop) {
+size_t pp_alloc(int sock, int prop) {
   if(!(prop & PROP_HIDDEN))
     ++pollpull.nAlive;
 
@@ -34,7 +35,7 @@ ssize_t pp_alloc(int sock, int prop) {
   int *props = realloc(pollpull.fds, nTotal * sizeof(int));
 
   if(!fds || !props)
-    return -1;
+    error(1, 0, "failed to alloc in pollpull");
 
   size_t j;
   for(j=i; j<nTotal; ++j) {
@@ -80,8 +81,12 @@ int pollin_revent(size_t i) {
     pp_free(i);
     if(!(pollpull.props[i] & PROP_HIDDEN))
       if(0 == --pollpull.nAlive) {
-        printf("no more alive clients, going to exit\n");
-        exit(0);
+        if(emu_config.keep_alive) {
+          printf("no more alive clients, keep running\n");
+        } else {
+          printf("no more alive clients, going to exit\n");
+          exit(0);
+        }
       }
 
     return -1;
@@ -143,5 +148,4 @@ __attribute__((destructor))
 static void destroy_pollfd() {
   free(pollpull.fds);
   free(pollpull.props);
-  pollpull = (struct pollpull_t){0};
 }

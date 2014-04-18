@@ -4,9 +4,7 @@
 #ifndef EMU_SERVER_H
 #define EMU_SERVER_H
 
-#include <stdlib.h>
 #include <sys/types.h>
-#include <sys/socket.h>
 
 
 extern struct emu_config_t {
@@ -14,6 +12,8 @@ extern struct emu_config_t {
   size_t qcapacity;
   int colorized_output;
   int tlp_quiet;
+  int keep_alive;
+  int no_pautina_config;
 } emu_config;
 
 

@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <poll.h>
 
+
 extern struct pollpull_t {
   struct pollfd *fds;
   int *props;
@@ -16,8 +17,8 @@ extern struct pollpull_t {
   size_t nAlive; /* qty of alive elements except hidden */
 } pollpull;
 
-
-ssize_t pp_alloc(int sock, int prop);
+/* returns index of the new element */
+size_t pp_alloc(int sock, int prop);
 void pp_free(size_t idx);
 
 void acceptClient();

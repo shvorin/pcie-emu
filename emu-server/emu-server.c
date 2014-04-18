@@ -13,6 +13,7 @@
 #include <fcntl.h>
 #include <error.h>
 #include <errno.h>
+#include <assert.h>
 #include <argtable2.h>
 #include <sys/wait.h>
 #include <pollpull.h>
@@ -48,6 +49,8 @@ struct emu_config_t emu_config = {
   .qcapacity = 10, /* ad hoc */
   .colorized_output = 0,
   .tlp_quiet = 0,
+  .keep_alive = 0,
+  .no_pautina_config = 0,
 };
 
 static int dram_shm_fd;
@@ -114,6 +117,11 @@ static void usage(void **argtable, const char *progname) {
 static pid_t pid_pc = 0;
 
 static void exec_pautina_config(const char *instanceId) {
+  if(emu_config.no_pautina_config) {
+    pid_pc = 0;
+    return;
+  }
+
   const pid_t pid = fork();
   if(pid == 0) {
     setenv("EMU", "", 0);
@@ -154,8 +162,10 @@ int main (int argc, char **argv) {
   struct arg_lit *dbg = arg_lit0(NULL, "dbg,debug", "debug mode: do not fork() for cleanup");
   struct arg_rex *color = arg_rex0(NULL, "color", "\\(^never$\\)\\|\\(^always$\\)\\|\\(^auto&\\)", "never|always|auto", 0, "colorized output");
   struct arg_lit *quiet = arg_lit0("q", "quiet", "do not show TLP stream");
+  struct arg_lit *keep_alive = arg_lit0(NULL, "keep-alive", "keep running after last client hung up");
+  struct arg_lit *no_pautina_config = arg_lit0(NULL, "no-pautina-config", "do not spawn pautina-config on startup");
 
-  void *argtable[] = {id, dbg, color, quiet, help, end};
+  void *argtable[] = {id, dbg, color, quiet, keep_alive, no_pautina_config, help, end};
 
   /* 0.0. Check for '--help' global option */
   {
@@ -220,8 +230,9 @@ int main (int argc, char **argv) {
       emu_config.colorized_output = isatty(fileno(stdout));
     }
 
-    if(quiet->count > 0)
-      emu_config.tlp_quiet = 1;
+    emu_config.tlp_quiet = quiet->count > 0;
+    emu_config.keep_alive = keep_alive->count > 0;
+    emu_config.no_pautina_config = no_pautina_config->count > 0;
   }
 
   /* 0.3. make aliases */
@@ -309,9 +320,8 @@ int main (int argc, char **argv) {
   if(listen(srvSock, /* FIXME: ad hoc client queue length */10) == -1)
     ERROR(1, errno, "listen() failed");
 
-  ssize_t srvIdx = pp_alloc(srvSock, PROP_HIDDEN);
-  if(0 != srvIdx)
-    ERROR(1, 0, "oops, something wrong with pollpull");
+  size_t srvIdx = pp_alloc(srvSock, PROP_HIDDEN);
+  assert(0 == srvIdx);
 
   /* 3.4 wait for clients */
   printf("Waiting for clients...\n");
@@ -378,25 +388,19 @@ int main (int argc, char **argv) {
 }
 
 void acceptClient() {
-  // 4. accept
   int cliSock = accept(pollpull.fds[0].fd, NULL, NULL);
 
+  /* 3. initial negotiation with client */
   int cliProp;
   Socket_RecvValue(cliSock, cliProp);
-
-  // 5. send
   Socket_SendValue(cliSock, emu_config.qcapacity);
-
   Socket_SendValue(cliSock, nBars);
 
   size_t i;
   for(i=0; i<nBars; ++i)
     Socket_SendValue(cliSock, bars[i]);
 
-  ssize_t cliIdx = pp_alloc(cliSock, cliProp);
-  if(-1 == cliIdx)
-    ERROR(1, 0, "failed to alloc in pollpull");
-
+  size_t cliIdx = pp_alloc(cliSock, cliProp);
   Socket_SendValue(cliSock, cliIdx);
 
   printf("A client #%lu connected!\n", cliIdx);
