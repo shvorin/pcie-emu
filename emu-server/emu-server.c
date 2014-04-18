@@ -20,6 +20,7 @@
 #include <emu-server.h>
 #include <socket-util.h>
 #include <bar-defs.h>
+#include <tlp-defs-old.h>
 
 
 #define ERROR(status, errnum, ...)                                  \
@@ -50,8 +51,6 @@ struct emu_config_t emu_config = {
 };
 
 static int dram_shm_fd;
-
-struct pollpull_t pollpull = {0}; /* NB: nullify! */
 
 int ghdl_main(int argc, char **argv);
 void grt__options__help();
@@ -118,6 +117,7 @@ static void exec_pautina_config(const char *instanceId) {
   const pid_t pid = fork();
   if(pid == 0) {
     setenv("EMU", "", 0);
+    setenv("EMU_HIDDEN", "", 0);
     setenv("SKIF_EMU_ID", instanceId, 1);
     const char path[] = "../../fpga-software/bin/pautina-config"; /* FIXME: ad hoc */
     int res = execl(path, path, "-c", "-a", "0x10000000", "-l", "0x10000000", (char*)NULL);
@@ -309,20 +309,13 @@ int main (int argc, char **argv) {
   if(listen(srvSock, /* FIXME: ad hoc client queue length */10) == -1)
     ERROR(1, errno, "listen() failed");
 
-  ssize_t srv_idx = alloc_pollfd(srvSock);
-  if(0 != srv_idx)
+  ssize_t srvIdx = pp_alloc(srvSock, PROP_HIDDEN);
+  if(0 != srvIdx)
     ERROR(1, 0, "oops, something wrong with pollpull");
 
   /* 3.4 wait for clients */
   printf("Waiting for clients...\n");
-  select_pollfd(/* infinite timeout */-1);
-  /* // wait */
-  /* if(-1 == poll_pollfd(-1)) */
-  /*   ERROR(1, errno, "poll() failed"); */
-
-  /* printf("done\n"); */
-
-  /* acceptClient(); */
+  pp_pollin(/* infinite timeout */-1);
 
   /* 4. init up- and downstream submodules */
   printf("dram_segstart: %p\n", dram_segstart);
@@ -330,8 +323,8 @@ int main (int argc, char **argv) {
 
   /* 5. run simulator */
   /* 5.1 fork() */
-  const pid_t pid_sim = dbg->count == 0 ? fork() : 0; /* do not fork() nor cleaup in debug
-                                                         mode */
+  pid_t pid_sim = dbg->count == 0 ? fork() : 0; /* do not fork() nor cleaup in debug
+                                                   mode */
   if(pid_sim == 0) {
     // disable annoying ieee asserts by default
     ghdl_argc++;
@@ -347,18 +340,21 @@ int main (int argc, char **argv) {
     ERROR(1, errno, "fork() failed");
 
   /* 5.2 wait for child */
-  int status;
-  const pid_t pid_cld = wait(&status);
-  if(pid_cld == -1)
-    ERROR(1, errno, "wait() failed");
-  else if(pid_cld == pid_pc) {
-    /* NB: don't expect pautina_config to exit */
-    ERROR(1, 0, "pautina_config exited, status: %d, %d\n", status, WEXITSTATUS(status));
-  } else if(pid_cld != pid_sim) {
-    ERROR(1, 0, "wait(): unknown child %d, status: %d, %d\n", pid_cld, status, WEXITSTATUS(status));
-  }
-
-  printf("simulator exited, status: %d, %d\n", status, WEXITSTATUS(status));
+  do {
+    int status;
+    const pid_t pid_cld = wait(&status);
+    if(pid_cld == -1)
+      ERROR(1, errno, "wait() failed");
+    else if(pid_cld == pid_pc) {
+      pid_pc = 0;
+      printf("ok, pautina_config exited, status: %d, %d\n", status, WEXITSTATUS(status));
+    } else if(pid_cld == pid_sim) {
+      pid_sim = 0;
+      printf("simulator exited, status: %d, %d\n", status, WEXITSTATUS(status));
+    } else {
+      ERROR(1, 0, "wait(): unknown child %d, status: %d, %d\n", pid_cld, status, WEXITSTATUS(status));
+    }
+  } while(pid_sim || pid_pc);
 
   /* 6. finalize */
   {
@@ -385,6 +381,9 @@ void acceptClient() {
   // 4. accept
   int cliSock = accept(pollpull.fds[0].fd, NULL, NULL);
 
+  int cliProp;
+  Socket_RecvValue(cliSock, cliProp);
+
   // 5. send
   Socket_SendValue(cliSock, emu_config.qcapacity);
 
@@ -394,13 +393,13 @@ void acceptClient() {
   for(i=0; i<nBars; ++i)
     Socket_SendValue(cliSock, bars[i]);
 
-  ssize_t cli_idx = alloc_pollfd(cliSock);
-  if(-1 == cli_idx)
+  ssize_t cliIdx = pp_alloc(cliSock, cliProp);
+  if(-1 == cliIdx)
     ERROR(1, 0, "failed to alloc in pollpull");
 
-  Socket_SendValue(cliSock, cli_idx);
+  Socket_SendValue(cliSock, cliIdx);
 
-  printf("A client #%lu connected!\n", cli_idx);
+  printf("A client #%lu connected!\n", cliIdx);
 }
 
 
@@ -408,6 +407,4 @@ __attribute__((destructor))
 static void finalize() {
   printf("emu-server finalize\n");
   kill_pautina_config();
-
-  free(pollpull.fds);
 }

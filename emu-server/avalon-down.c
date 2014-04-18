@@ -31,7 +31,7 @@ void line256_down(line_down_scalars_t *bar, ast256_t *ast, ast_bp_t *ast_bp) {
   ast_bp->ready = drand48() > .01 ? stdl_1 : stdl_0;
 #endif
 
-  static TlpPacket p;
+  static TlpPacket pkt;
   static size_t count = 0;
   static size_t nLines = /* some meaningless value */-1;
   static size_t payload_qw_end;
@@ -39,32 +39,32 @@ void line256_down(line_down_scalars_t *bar, ast256_t *ast, ast_bp_t *ast_bp) {
   static char yyy[1024];
   static streambuf_t streambuf = {.start = yyy, .end = yyy + sizeof(yyy)};
 
-  if(count == 0) {
-    char * buf = (char *)&p;
-    size_t len = sizeof(TlpPacket);
-
-    ssize_t selected = select_pollfd(/* zero timeout */0);
-
-    if(selected > 0) {
-      Socket_Recv(pollpull.fds[selected].fd, buf, len);
-    } else {
-      ast->valid = ast->sop = ast->eop = stdl_0;
-      return;
-    }
-  }
-
-  bar->bar_num = p.bar_num;
-
   tlp_header head;
 
   if(count == 0) {
+    /* capture TLP packet from client */
+    {
+      char * buf = (char *)&pkt;
+      size_t len = sizeof(TlpPacket);
+
+      int cliSock = pp_pollin(/* zero timeout */0);
+
+      if(-1 == cliSock) {
+        /* no event found, just skip the line */
+        ast->valid = ast->sop = ast->eop = stdl_0;
+        return;
+      } else {
+        Socket_Recv(cliSock, buf, len);
+      }
+    }
+
     /* issue header */
     bufrewind(&streambuf);
     payload_qw_end = 0; /* no payload by default */
 
-    switch(p.kind) {
+    switch(pkt.kind) {
     case writeReq:
-      head = mk_w32_header(p.addr, p.nBytes);
+      head = mk_w32_header(pkt.addr, pkt.nBytes);
       /* aligned data expected  */
       assert((head.rw.dw0.s.len & 1) == 0);
 
@@ -77,18 +77,18 @@ void line256_down(line_down_scalars_t *bar, ast256_t *ast, ast_bp_t *ast_bp) {
     case readReq:
       {
         static int token_counter = 0;
-        const uint64_t clientId = p.bdata[0];
+        const uint64_t clientId = pkt.bdata[0];
         token_t token = ((clientId << 4) & 0xFF) | (token_counter++ & 0xF);
         rreq_item_t item = {.token = token,
                             .clientId = clientId,
-                            .nBytes = p.bdata[1]};
+                            .nBytes = pkt.bdata[1]};
 
         rreq_item_t *ptr_item = malloc(sizeof(rreq_item_t));
         *ptr_item = item;
 
         rreq_insert(ptr_item);
 
-        head = mk_r32_header(p.addr, p.nBytes, token);
+        head = mk_r32_header(pkt.addr, pkt.nBytes, token);
         /* aligned data expected  */
         assert((head.rw.dw0.s.len & 1) == 0);
 
@@ -104,16 +104,17 @@ void line256_down(line_down_scalars_t *bar, ast256_t *ast, ast_bp_t *ast_bp) {
     memcpy(ast->data, &head, sizeof(head));
 
     /* payload */
-    memcpy(ast->data + 4, p.bdata, 16);
+    memcpy(ast->data + 4, pkt.bdata, 16);
 
     bufshow_tlp_head(&streambuf, nLines, head);
   } else {
     /* payload */
-    memcpy(ast->data, p.bdata + 16 + 32 * (count - 1), 32);
+    memcpy(ast->data, pkt.bdata + 16 + 32 * (count - 1), 32);
   }
 
   ast->valid = stdl_1;
   ast->sop = count == 0 ? stdl_1 : stdl_0;
+  bar->bar_num = pkt.bar_num;
 
   bufshow_line256(&streambuf, ast, count, payload_qw_end);
 

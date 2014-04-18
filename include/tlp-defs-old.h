@@ -22,5 +22,6 @@ typedef struct {
   uint8_t bdata[maxBytes_tlpPacket];
 } TlpPacket;
 
+enum {PROP_HIDDEN = 0x1};
 
 #endif /* TLP_DEFS_OLD_H */
