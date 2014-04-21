@@ -22,6 +22,7 @@
 #include <socket-util.h>
 #include <bar-defs.h>
 #include <emu-common.h>
+#include <grp.h>
 
 
 #define ERROR(status, errnum, ...)                                  \
@@ -60,8 +61,10 @@ void grt__options__help();
 
 
 static void *mkshm_exclusive(const char *fname, int *fd, size_t size) {
-  umask(0011);
-  *fd = shm_open(fname, O_CREAT | O_EXCL | O_RDWR, 0666);
+  umask(0012);
+  mode_t mode = 0660;
+
+  *fd = shm_open(fname, O_CREAT | O_EXCL | O_RDWR, mode);
 
   if(*fd == -1) {
     if(errno == EEXIST) {
@@ -71,7 +74,7 @@ static void *mkshm_exclusive(const char *fname, int *fd, size_t size) {
       if(-1 == shm_unlink(fname))
         goto failed;
 
-      *fd = shm_open(fname, O_CREAT | O_EXCL | O_RDWR, 0666);
+      *fd = shm_open(fname, O_CREAT | O_EXCL | O_RDWR, mode);
         
       if(*fd == -1)
         goto failed;

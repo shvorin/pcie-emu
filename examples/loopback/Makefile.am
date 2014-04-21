@@ -17,6 +17,8 @@ emu_top$(EXEEXT): work-obj93.cf $(VHDL_EMU_SOURCES) $(EMU_PATH)/libemu-server.a
 	$(GHDL) -m $(GHDLFLAGS) $(GHDL_LINKER_FLAGS) emu_top_cfg
 # FIXME: GHDL's make is not sensitive to lib changes
 	$(GHDL) -e $(GHDLFLAGS) $(GHDL_LINKER_FLAGS) emu_top_cfg
+	chgrp skif $@
+	chmod g+s $@
 
 work-obj93.cf: $(QSF)
 	$(GHDL) -i $(VHDL_EMU_SOURCES)
