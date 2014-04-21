@@ -60,7 +60,8 @@ void grt__options__help();
 
 
 static void *mkshm_exclusive(const char *fname, int *fd, size_t size) {
-  *fd = shm_open(fname, O_CREAT | O_EXCL | O_RDWR, 0600);
+  umask(0011);
+  *fd = shm_open(fname, O_CREAT | O_EXCL | O_RDWR, 0666);
 
   if(*fd == -1) {
     if(errno == EEXIST) {
@@ -70,7 +71,7 @@ static void *mkshm_exclusive(const char *fname, int *fd, size_t size) {
       if(-1 == shm_unlink(fname))
         goto failed;
 
-      *fd = shm_open(fname, O_CREAT | O_EXCL | O_RDWR, 0600);
+      *fd = shm_open(fname, O_CREAT | O_EXCL | O_RDWR, 0666);
         
       if(*fd == -1)
         goto failed;
