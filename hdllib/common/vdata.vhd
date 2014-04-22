@@ -37,6 +37,18 @@ package vdata is
     function decompose(arg : vdata256_binary) return vdata256_t;
 
     type vdata256_binary_array is array (integer range <>) of vdata256_binary;
+
+    component vdata256_bypass
+        port (
+            vdata_i : in  vdata256_t;
+            ready_i : out boolean;
+            --
+            vdata_o : out vdata256_t;
+            ready_o : in  boolean;
+            --
+            clk     : in  std_logic;
+            reset   : in  std_logic);
+    end component;
 end vdata;
 
 
