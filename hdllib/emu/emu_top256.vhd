@@ -26,6 +26,8 @@ architecture emu_top256 of emu_top256 is
     signal ast_tx_bp      : ast_bp_t;
     signal rx_st_bardec   : std_logic_vector(7 downto 0);
 
+    signal ast_tx_bp_1, ast_tx_bp_2 : ast_bp_t;
+
     -- data representation for foreing calls
     type foreign_tlp256_data_t is array (integer range 0 to 7) of integer;
 
@@ -139,5 +141,17 @@ begin
             line256_up(wrap(ast_tx));
         end if;
     end process;
-    
+
+    check_protocol : process(clk, reset)
+    begin
+        if reset = '1' then
+            ast_tx_bp_1.ready <= '1';
+            ast_tx_bp_2.ready <= '1';
+        elsif rising_edge(clk) then
+            ast_tx_bp_1 <= ast_tx_bp;
+            ast_tx_bp_2 <= ast_tx_bp_1;
+
+            assert (ast_tx_bp_2.ready or not ast_tx.valid) = '1' report "AST protocol violation";
+        end if;
+    end process;
 end emu_top256;

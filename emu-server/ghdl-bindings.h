@@ -1,7 +1,6 @@
 /* Copyright (c) 2011-2014, Ailamazyan Program Systems Institute (Russian             
  * Academy of Science). See COPYING in top-level directory. */
 
-
 #ifndef GHDL_BINDINGS_H
 #define GHDL_BINDINGS_H
 
@@ -37,5 +36,10 @@ typedef struct {
 static const std_logic stdl_0 = {2}, stdl_1 = {3};
 
 static int std_logic_eq(std_logic a, std_logic b) { return a.val == b.val; }
+
+static char to_char(std_logic a) {
+  static char char_table[] = "UX01ZWLH-";
+  return char_table[a.val];
+}
 
 #endif /* GHDL_BINDINGS_H */
