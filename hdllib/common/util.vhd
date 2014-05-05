@@ -12,10 +12,11 @@ use work.types.all;
 
 
 package util is
-    function maximum (constant t1, t2 : natural) return natural;
-    function minimum (constant t1, t2 : natural) return natural;
-    function minimum (constant t1, t2 : std_logic_vector) return std_logic_vector;
-    function minimum (constant a      : integer_array) return integer;
+    function maximum(constant t1, t2 : natural) return natural;
+    function maximum(constant a      : integer_array) return integer;
+    function minimum(constant t1, t2 : natural) return natural;
+    function minimum(constant t1, t2 : std_logic_vector) return std_logic_vector;
+    function minimum(constant a      : integer_array) return integer;
 
     -- nearly the same as UNSIGNED_NUM_BITS from ieee.numeric_bit
     -- NB: UNSIGNED_NUM_BITS seem to be incorrect ;)
@@ -156,6 +157,17 @@ package body util is
     begin
         if t1 > t2 then return t1; else return t2; end if;
     end maximum;
+
+    function maximum (constant a : integer_array) return integer is
+        variable result : integer := a(a'low);
+    begin
+        for i in a'range loop
+            if a(i) > result then
+                result := a(i);
+            end if;
+        end loop;
+        return result;
+    end;
 
     function minimum (constant t1, t2 : natural) return natural is
     begin
