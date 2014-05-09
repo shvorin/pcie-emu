@@ -69,6 +69,8 @@ package util is
     function extend64(v : std_logic_vector) return qword;
     function extend64(i : integer) return qword;
 
+    function extend(size : natural; v : std_logic_vector) return std_logic_vector;
+
     -- from std_logic_1164_additions
     function to_hstring (value : std_ulogic_vector) return string;
     function to_hstring (value : std_logic_vector) return string;
@@ -356,6 +358,14 @@ package body util is
     function extend64(i : integer) return qword is
     begin
         return conv_std_logic_vector(i, 64);
+    end;
+
+    function extend(size : natural; v : std_logic_vector) return std_logic_vector is
+        variable result : std_logic_vector(size - 1 downto 0) := (others => '0');
+    begin
+        result(v'length - 1 downto 0) := v;
+
+        return result;
     end;
 
     function to_hstring (value : std_ulogic_vector) return string is
