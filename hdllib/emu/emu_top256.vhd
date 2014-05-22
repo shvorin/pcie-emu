@@ -61,12 +61,12 @@ architecture emu_top256 of emu_top256 is
 
     function wrap(a : ast_t) return foreign_ast is
     begin
-        return (wrap(a.data), a.valid, a.sop, a.eop, a.empty);
+        return (wrap(a.data), a.valid, a.sop(0), a.eop(0), a.empty);
     end;
 
     function unwrap(f : foreign_ast) return ast_t is
     begin
-        return (unwrap(f.data), f.valid, f.sop, f.eop, f.empty);
+        return (unwrap(f.data), f.valid, (0 => f.sop, 1 => '0'), (0 => f.eop, 1 => '0'), f.empty);
     end;
 
     -- About linking with foreign functions see
