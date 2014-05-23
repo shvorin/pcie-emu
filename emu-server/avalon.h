@@ -17,8 +17,10 @@ typedef struct {
 
 typedef struct {
   uint32_t data[8];
-  std_logic valid, sop, eop;
-  std_logic empty[2];
+  std_logic valid;
+  /* NB: vectors reversed by VHDL emu toplevel, so sop[0] in this C-structure is mapped to
+     sop(0) in VHDL-structure, and so on */
+  std_logic sop[2], eop[2], empty[2];
 } ast256_t;
 
 typedef struct {

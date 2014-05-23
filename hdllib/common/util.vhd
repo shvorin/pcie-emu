@@ -74,6 +74,8 @@ package util is
     -- from std_logic_1164_additions
     function to_hstring (value : std_ulogic_vector) return string;
     function to_hstring (value : std_logic_vector) return string;
+
+    function reverse(x : std_logic_vector) return std_logic_vector;
 end util;
 
 
@@ -415,4 +417,14 @@ package body util is
     begin
         return to_hstring (to_stdulogicvector (value));
     end function to_hstring;
+
+    function reverse(x : std_logic_vector) return std_logic_vector is
+        variable result : std_logic_vector(x'range);
+    begin
+        for i in x'range loop
+            result(i) := x(x'high + x'low - i);
+        end loop;
+
+        return result;
+    end;
 end util;

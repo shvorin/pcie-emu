@@ -32,11 +32,10 @@ architecture emu_top256 of emu_top256 is
     type foreign_tlp256_data_t is array (integer range 0 to 7) of integer;
 
     type foreign_ast is record
-        data  : foreign_tlp256_data_t;
-        valid : std_logic;
-        sop   : std_logic;
-        eop   : std_logic;
-        empty : std_logic_vector(1 downto 0);
+        data            : foreign_tlp256_data_t;
+        valid           : std_logic;
+        -- NB: vectors reversed
+        sop, eop, empty : std_logic_vector(0 to 1);
     end record;
 
     function wrap(data : tlp256.data_t) return foreign_tlp256_data_t is
@@ -61,12 +60,12 @@ architecture emu_top256 of emu_top256 is
 
     function wrap(a : ast_t) return foreign_ast is
     begin
-        return (wrap(a.data), a.valid, a.sop(0), a.eop(0), a.empty);
+        return (wrap(a.data), a.valid, reverse(a.sop), reverse(a.eop), reverse(a.empty));
     end;
 
     function unwrap(f : foreign_ast) return ast_t is
     begin
-        return (unwrap(f.data), f.valid, (0 => f.sop, 1 => '0'), (0 => f.eop, 1 => '0'), f.empty);
+        return (unwrap(f.data), f.valid, reverse(f.sop), reverse(f.eop), reverse(f.empty));
     end;
 
     -- About linking with foreign functions see

@@ -23,6 +23,7 @@
 
 void line256_down(line_down_scalars_t *bar, ast256_t *ast, ast_bp_t *ast_bp) {
   ast->empty[0] = ast->empty[1] = stdl_0; /* FIXME */
+  ast->sop[1] = ast->eop[1] = stdl_0; /* unused yet */
 
   // first, take care of ej_ready; TODO: enhance
 #if 0
@@ -51,7 +52,7 @@ void line256_down(line_down_scalars_t *bar, ast256_t *ast, ast_bp_t *ast_bp) {
 
       if(-1 == cliSock) {
         /* no event found, just skip the line */
-        ast->valid = ast->sop = ast->eop = stdl_0;
+        ast->valid = ast->sop[0] = ast->eop[0] = stdl_0;
         return;
       } else {
         Socket_Recv(cliSock, buf, len);
@@ -113,7 +114,7 @@ void line256_down(line_down_scalars_t *bar, ast256_t *ast, ast_bp_t *ast_bp) {
   }
 
   ast->valid = stdl_1;
-  ast->sop = count == 0 ? stdl_1 : stdl_0;
+  ast->sop[0] = count == 0 ? stdl_1 : stdl_0;
   bar->bar_num = pkt.bar_num;
 
   bufshow_line256(&streambuf, ast, count, payload_qw_end);
@@ -125,9 +126,9 @@ void line256_down(line_down_scalars_t *bar, ast256_t *ast, ast_bp_t *ast_bp) {
       printf("DN: %s\n", streambuf.start);
 
     count = 0;
-    ast->eop = stdl_1;
+    ast->eop[0] = stdl_1;
   } else {
-    ast->eop = stdl_0;
+    ast->eop[0] = stdl_0;
   }
 }
 
