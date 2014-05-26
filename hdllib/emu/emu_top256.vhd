@@ -8,6 +8,7 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_arith.all;
 use ieee.std_logic_unsigned.all;
 
+use work.types.all;
 use work.util.all;
 use work.tlp_package.all;
 use work.tlp256;
@@ -60,12 +61,21 @@ architecture emu_top256 of emu_top256 is
 
     function wrap(a : ast_t) return foreign_ast is
     begin
-        return (wrap(a.data), a.valid, reverse(a.sop), reverse(a.eop), reverse(a.empty));
+        return (wrap(a.hi.data & a.lo.data),
+                a.valid,
+                -- NB: reversed!
+                a.lo.sop & a.hi.sop,
+                a.lo.eop & a.hi.eop,
+                a.lo.empty & a.hi.empty);
     end;
 
     function unwrap(f : foreign_ast) return ast_t is
+        constant data : data256_t := unwrap(f.data);
     begin
-        return (unwrap(f.data), f.valid, reverse(f.sop), reverse(f.eop), reverse(f.empty));
+        return (
+            lo    => (data(127 downto 0), f.sop(0), f.eop(0), f.empty(0)),
+            hi    => (data(255 downto 128), f.sop(1), f.eop(1), f.empty(1)),
+            valid => f.valid);
     end;
 
     -- About linking with foreign functions see
