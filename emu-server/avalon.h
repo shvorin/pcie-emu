@@ -23,6 +23,15 @@ typedef struct {
   std_logic sop[2], eop[2], empty[2];
 } ast256_t;
 
+/* multipacket version */
+typedef struct {
+  struct {
+    uint32_t data[4];
+    std_logic sop, eop, empty;
+  } lo, hi;
+  std_logic valid;
+} ast256mp_t;
+
 typedef struct {
   std_logic ready;
 } ast_bp_t;
@@ -41,6 +50,9 @@ void line128_up(std_logic tx_dvalid, const uint32_t arr[4]);
 
 void line256_down(line_down_scalars_t *bar, ast256_t *ast, ast_bp_t *ast_bp);
 void line256_up(const ast256_t *ast);
+
+void line256mp_down(line_down_scalars_t *bar, ast256mp_t *ast, ast_bp_t *ast_bp);
+void line256mp_up(const ast256mp_t *ast);
 
 typedef struct {
   char * const start;

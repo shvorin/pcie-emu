@@ -45,6 +45,95 @@ void init_tlp_up(char * dram_segment, size_t _dram_segsize) {
 }
 #endif
 
+void line256mp_up(const ast256mp_t *ast) {
+  if(std_logic_eq(ast->valid, stdl_0))
+    return;
+
+  static size_t count = 0;
+  static size_t nLines;
+
+  static char p_bdata[1024]; // FIXME: ad hoc
+  static tlp_header head;
+  static size_t payload_qw_end;
+
+  static char yyy[1024];
+  static streambuf_t streambuf = {.start = yyy, .end = yyy + sizeof(yyy)};
+
+  ++count;
+
+  if(1 == count) /* header arrived */{
+    bufrewind(&streambuf);
+
+    memcpy(&head, ast->lo.data, sizeof(head));
+
+    /* aligned data expected  */
+    assert((head.rw.dw0.s.len & 1) == 0);
+
+    /* hhhhdddd, dddddddd, ... */
+    nLines = (head.rw.dw0.s.len + 3)/8 + 1;
+
+    bufshow_tlp_head(&streambuf, nLines, head);
+
+    /* payload */
+    memcpy(p_bdata, ast->hi.data, 16);
+
+    switch(parse_type(head)) {
+    case tlp_kind_write:
+    case tlp_kind_cpl:
+      payload_qw_end = (head.rw.dw0.s.len >> 1) + 2;
+      break;
+
+    default:
+      payload_qw_end = 0;
+    }
+  } else {
+    /* payload */
+    memcpy(p_bdata + 16 + 32 * (count - 2), ast->lo.data, 16);
+    memcpy(p_bdata + 32 + 32 * (count - 2), ast->hi.data, 16);
+  }
+
+#if 0
+  bufshow_line256(&streambuf, ast, count - 1, payload_qw_end);
+#endif
+
+  if(nLines == count) /* tail arriverd */ {
+    if(!emu_config.tlp_quiet)
+      printf("UP: %s\n", streambuf.start);
+
+    size_t p_nBytes = head.rw.dw0.s.len * 4;
+
+    switch(parse_type(head)) {
+    case tlp_kind_write:
+      memcpy(offset + parse_addr(head.rw.rawaddr, is_4dw(head)), p_bdata, p_nBytes);
+      sfence();
+      break;
+
+    case tlp_kind_cpl:
+      {
+        token_t token = head.cpl.dw2.s.tag & 0xFF;
+        rreq_item_t *item = rreq_find(token);
+        if(NULL == item)
+          error(1, 0, "a reply to an unknown read request");
+
+        assert(item->nBytes == p_nBytes);
+        size_t clientId = (size_t)item->clientId;
+        /* TODO: the send may fail since client's timeout exhausted */
+        /* Socket_Send(pollfds[clientId].fd, p_bdata, p_nBytes); */
+        Socket_Send(pollpull.fds[clientId].fd, p_bdata, p_nBytes);
+
+        rreq_delete(token);
+        free(item);
+      }
+      break;
+
+    default:
+      error(1, 0, "packet kind not implemented");
+    }
+
+    count = 0;
+  }
+}
+
 void line256_up(const ast256_t *ast) {
   if(std_logic_eq(ast->valid, stdl_0))
     return;
