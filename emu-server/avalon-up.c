@@ -92,9 +92,7 @@ void line256mp_up(const ast256mp_t *ast) {
     memcpy(p_bdata + 32 + 32 * (count - 2), ast->hi.data, 16);
   }
 
-#if 0
-  bufshow_line256(&streambuf, ast, count - 1, payload_qw_end);
-#endif
+  bufshow_line256mp(&streambuf, ast, count - 1, payload_qw_end);
 
   if(nLines == count) /* tail arriverd */ {
     if(!emu_config.tlp_quiet)
@@ -180,7 +178,7 @@ void line256_up(const ast256_t *ast) {
     memcpy(p_bdata + 16 + 32 * (count - 2), ast->data, 32);
   }
 
-  bufshow_line256(&streambuf, ast, count - 1, payload_qw_end);
+  bufshow_line256mp(&streambuf, ast, count - 1, payload_qw_end);
 
   if(nLines == count) /* tail arriverd */ {
     if(!emu_config.tlp_quiet)

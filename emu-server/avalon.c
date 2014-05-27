@@ -25,6 +25,27 @@ int bufprintf(streambuf_t *sbuf, const char *fmt, ...) {
 }
 
 
+void bufshow_line256mp(streambuf_t *sbuf, const ast256mp_t *ast, size_t line_count, size_t payload_qw_end) {
+  if(emu_config.tlp_quiet) return;
+  char *fmt;
+  int i;
+  for(i=0;i<4;++i) {
+    const size_t payload_qw_cnt = line_count * 4 + i;
+    if (payload_qw_cnt < 2 && emu_config.colorized_output) {
+      /* TLP head */
+      fmt = "\e[0;31m%016lX \e[0m";
+    } else if(payload_qw_cnt < payload_qw_end && emu_config.colorized_output) {
+      /* TLP payload  */
+      fmt = "\e[0;32m%016lX \e[0m";
+    } else {
+      fmt = "%016lX ";
+    }
+
+    const uint32_t *data = i < 2 ? ast->lo.data+2*i : ast->hi.data+2*(i-2);
+    bufprintf(sbuf, fmt, *((uint64_t*)data));
+  }
+}
+
 void bufshow_line256(streambuf_t *sbuf, const ast256_t *ast, size_t line_count, size_t payload_qw_end) {
   if(emu_config.tlp_quiet) return;
   char *fmt;

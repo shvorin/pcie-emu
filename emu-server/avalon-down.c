@@ -246,9 +246,7 @@ void line256mp_down(line_down_scalars_t *bar, ast256mp_t *ast, ast_bp_t *ast_bp)
   ast->lo.sop = count == 0 ? stdl_1 : stdl_0;
   bar->bar_num = pkt.bar_num;
 
-#if 0
-  bufshow_line256(&streambuf, ast, count, payload_qw_end);
-#endif
+  bufshow_line256mp(&streambuf, ast, count, payload_qw_end);
 
   ++count;
 
