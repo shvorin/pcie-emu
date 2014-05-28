@@ -23,7 +23,7 @@
 #if 0
 void line256mp_down(line_down_scalars_t *bar, ast256mp_t *ast, ast_bp_t *ast_bp) {
   // TODO
-  ast->lo.empty = ast->hi.empty = stdl_0;
+  ast->half[0].empty = ast->half[1].empty = stdl_0;
 
   // first, take care of ej_ready; TODO: enhance
 #if 0
@@ -108,31 +108,30 @@ void line256mp_down(line_down_scalars_t *bar, ast256mp_t *ast, ast_bp_t *ast_bp)
 
   int k;
   for(k=0; k<1; ++k) {
-    typeof(ast->lo) *half = k ? &ast->hi : &ast->lo;
     if(count == 0) {
       if(!recv_packet()) {
         /* no event found */
-        half->sop = half->eop = stdl_0;
+        ast->half[k]->sop = ast->half[k] = stdl_0;
         ast->valid = k ? stdl_1 : stdl_0;
         return;
       }
 
       /* tlp header */
-      memcpy(half->data, &head, sizeof(head));
-      half->sop = stdl_1;
+      memcpy(ast->half[k]->data, &head, sizeof(head));
+      ast->half[k]->sop = stdl_1;
     } else {
       /* payload */
-      memcpy(half->data, pkt.bdata + 16 * count, 16);
-      half->sop = stdl_0;
+      memcpy(ast->half[k]->data, pkt.bdata + 16 * count, 16);
+      ast->half[k]->sop = stdl_0;
     }
 
     ++count;
 
     if(count == nSublines) {
       count = 0;
-      half->eop = stdl_1;
+      ast->half[k]->eop = stdl_1;
     } else {
-      half->eop = stdl_0;
+      ast->half[k]->eop = stdl_0;
     }
   }
 
@@ -142,8 +141,8 @@ void line256mp_down(line_down_scalars_t *bar, ast256mp_t *ast, ast_bp_t *ast_bp)
 #endif
 
 void line256mp_down(line_down_scalars_t *bar, ast256mp_t *ast, ast_bp_t *ast_bp) {
-  ast->lo.empty = ast->hi.empty = stdl_0; /* FIXME */
-  ast->hi.sop = ast->hi.eop = stdl_0; /* unused yet */
+  ast->half[0].empty = ast->half[1].empty = stdl_0; /* FIXME */
+  ast->half[1].sop = ast->half[1].eop = stdl_0; /* unused yet */
 
   // first, take care of ej_ready; TODO: enhance
 #if 0
@@ -220,10 +219,10 @@ void line256mp_down(line_down_scalars_t *bar, ast256mp_t *ast, ast_bp_t *ast_bp)
     }
 
     /* tlp header */
-    memcpy(ast->lo.data, &head, sizeof(head));
+    memcpy(ast->half[0].data, &head, sizeof(head));
 
     /* payload */
-    memcpy(ast->hi.data, pkt.bdata, 16);
+    memcpy(ast->half[1].data, pkt.bdata, 16);
 
     bufshow_tlp_head(&streambuf, nLines, head);
 
@@ -233,17 +232,17 @@ void line256mp_down(line_down_scalars_t *bar, ast256mp_t *ast, ast_bp_t *ast_bp)
   if(count == 0) {
     if(!recv_packet()) {
       /* no event found, just skip the line */
-      ast->valid = ast->lo.sop = ast->lo.eop = stdl_0;
+      ast->valid = ast->half[0].sop = ast->half[0].eop = stdl_0;
       return;
     }
   } else {
     /* payload */
-    memcpy(ast->lo.data, pkt.bdata + 16 + 32 * (count - 1), 16);
-    memcpy(ast->hi.data, pkt.bdata + 32 + 32 * (count - 1), 16);
+    memcpy(ast->half[0].data, pkt.bdata + 16 + 32 * (count - 1), 16);
+    memcpy(ast->half[1].data, pkt.bdata + 32 + 32 * (count - 1), 16);
   }
 
   ast->valid = stdl_1;
-  ast->lo.sop = count == 0 ? stdl_1 : stdl_0;
+  ast->half[0].sop = count == 0 ? stdl_1 : stdl_0;
   bar->bar_num = pkt.bar_num;
 
   bufshow_line256mp(&streambuf, ast, count, payload_qw_end);
@@ -255,9 +254,9 @@ void line256mp_down(line_down_scalars_t *bar, ast256mp_t *ast, ast_bp_t *ast_bp)
       printf("DN: %s\n", streambuf.start);
 
     count = 0;
-    ast->lo.eop = stdl_1;
+    ast->half[0].eop = stdl_1;
   } else {
-    ast->lo.eop = stdl_0;
+    ast->half[0].eop = stdl_0;
   }
 }
 

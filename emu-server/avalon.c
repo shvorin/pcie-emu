@@ -41,7 +41,7 @@ void bufshow_line256mp(streambuf_t *sbuf, const ast256mp_t *ast, size_t line_cou
       fmt = "%016lX ";
     }
 
-    const uint32_t *data = i < 2 ? ast->lo.data+2*i : ast->hi.data+2*(i-2);
+    const uint32_t *data = i < 2 ? ast->half[0].data+2*i : ast->half[1].data+2*(i-2);
     bufprintf(sbuf, fmt, *((uint64_t*)data));
   }
 }

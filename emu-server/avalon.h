@@ -28,7 +28,7 @@ typedef struct {
   struct {
     uint32_t data[4];
     std_logic sop, eop, empty;
-  } lo, hi;
+  } half[2];
   std_logic valid;
 } ast256mp_t;
 

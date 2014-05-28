@@ -64,7 +64,7 @@ void line256mp_up(const ast256mp_t *ast) {
   if(1 == count) /* header arrived */{
     bufrewind(&streambuf);
 
-    memcpy(&head, ast->lo.data, sizeof(head));
+    memcpy(&head, ast->half[0].data, sizeof(head));
 
     /* aligned data expected  */
     assert((head.rw.dw0.s.len & 1) == 0);
@@ -75,7 +75,7 @@ void line256mp_up(const ast256mp_t *ast) {
     bufshow_tlp_head(&streambuf, nLines, head);
 
     /* payload */
-    memcpy(p_bdata, ast->hi.data, 16);
+    memcpy(p_bdata, ast->half[1].data, 16);
 
     switch(parse_type(head)) {
     case tlp_kind_write:
@@ -88,8 +88,8 @@ void line256mp_up(const ast256mp_t *ast) {
     }
   } else {
     /* payload */
-    memcpy(p_bdata + 16 + 32 * (count - 2), ast->lo.data, 16);
-    memcpy(p_bdata + 32 + 32 * (count - 2), ast->hi.data, 16);
+    memcpy(p_bdata + 16 + 32 * (count - 2), ast->half[0].data, 16);
+    memcpy(p_bdata + 32 + 32 * (count - 2), ast->half[1].data, 16);
   }
 
   bufshow_line256mp(&streambuf, ast, count - 1, payload_qw_end);

@@ -36,9 +36,11 @@ architecture emu_top256 of emu_top256 is
         sop, eop, empty : std_logic;
     end record;
 
+    type foreign_half_ast_array is array (half_idx) of foreign_half_ast;
+
     type foreign_ast is record
-        lo, hi : foreign_half_ast;
-        valid  : std_logic;
+        half  : foreign_half_ast_array;
+        valid : std_logic;
     end record;
 
     function wrap(data : qqword) return foreign_tlp128_data_t is
@@ -70,8 +72,7 @@ architecture emu_top256 of emu_top256 is
                     empty => h.empty);
         end;
     begin
-        return (lo    => wrap(a.lo),
-                hi    => wrap(a.hi),
+        return (half  => (wrap(a.half(lo)), wrap(a.half(hi))),
                 valid => a.valid);
     end;
 
@@ -84,8 +85,7 @@ architecture emu_top256 of emu_top256 is
                     empty => h.empty);
         end;
     begin
-        return (lo    => unwrap(f.lo),
-                hi    => unwrap(f.hi),
+        return (half  => (unwrap(f.half(lo)), unwrap(f.half(hi))),
                 valid => f.valid);
     end;
 
