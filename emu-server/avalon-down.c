@@ -20,10 +20,14 @@
 #include <avalon.h>
 #include <rreq-storage.h>
 
-#if 0
+#if 1
 void line256mp_down(line_down_scalars_t *bar, ast256mp_t *ast, ast_bp_t *ast_bp) {
-  // TODO
-  ast->half[0].empty = ast->half[1].empty = stdl_0;
+  ast->half[0].empty = ast->half[1].empty = stdl_0; /* FIXME */
+
+  /* default values */
+  ast->half[0].sop = ast->half[0].eop = stdl_0;
+  ast->half[1].sop = ast->half[1].eop = stdl_0;
+  ast->valid = stdl_0;
 
   // first, take care of ej_ready; TODO: enhance
 #if 0
@@ -55,6 +59,8 @@ void line256mp_down(line_down_scalars_t *bar, ast256mp_t *ast, ast_bp_t *ast_bp)
       }
     }
 
+    size_t nLines = -1;
+
     /* issue header */
     bufrewind(&streambuf);
     payload_qw_end = 0; /* no payload by default */
@@ -67,6 +73,7 @@ void line256mp_down(line_down_scalars_t *bar, ast256mp_t *ast, ast_bp_t *ast_bp)
 
       /* hhhhdddd, dddddddd, ... */
       nSublines = (head.rw.dw0.s.len + 3)/4 + 1;
+      nLines = (head.rw.dw0.s.len + 3)/8 + 1;
 
       payload_qw_end = (head.rw.dw0.s.len >> 1) + 2;
       break;
@@ -89,7 +96,8 @@ void line256mp_down(line_down_scalars_t *bar, ast256mp_t *ast, ast_bp_t *ast_bp)
         /* aligned data expected  */
         assert((head.rw.dw0.s.len & 1) == 0);
 
-        nSublines = 2;
+        nSublines = 1;
+        nLines = 1;
       }
       break;
 
@@ -97,9 +105,7 @@ void line256mp_down(line_down_scalars_t *bar, ast256mp_t *ast, ast_bp_t *ast_bp)
       error(1, 0, "not implemented packet kind");
     }
 
-#if 0
-    bufshow_tlp_head(&streambuf, nSublines, head);
-#endif
+    bufshow_tlp_head(&streambuf, nLines, head);
 
     return 1;
   }
@@ -107,42 +113,51 @@ void line256mp_down(line_down_scalars_t *bar, ast256mp_t *ast, ast_bp_t *ast_bp)
   static size_t count = 0;
 
   int k;
-  for(k=0; k<1; ++k) {
+  for(k=0; k<2; ++k) {
     if(count == 0) {
       if(!recv_packet()) {
         /* no event found */
-        ast->half[k]->sop = ast->half[k] = stdl_0;
         ast->valid = k ? stdl_1 : stdl_0;
         return;
       }
 
       /* tlp header */
-      memcpy(ast->half[k]->data, &head, sizeof(head));
-      ast->half[k]->sop = stdl_1;
+      memcpy(ast->half[k].data, &head, sizeof(head));
     } else {
       /* payload */
-      memcpy(ast->half[k]->data, pkt.bdata + 16 * count, 16);
-      ast->half[k]->sop = stdl_0;
+      memcpy(ast->half[k].data, pkt.bdata + 16 * (count - 1), 16);
     }
+
+    if(0 == count)
+      ast->half[k].sop = stdl_1;
+    if(nSublines - 1 == count)
+      ast->half[k].eop = stdl_1;
+
+    bufshow_line256mp(&streambuf, ast, count, payload_qw_end);
 
     ++count;
 
     if(count == nSublines) {
       count = 0;
-      ast->half[k]->eop = stdl_1;
-    } else {
-      ast->half[k]->eop = stdl_0;
+
+      if(!emu_config.tlp_quiet)
+        printf("DN: %s\n", streambuf.start);
     }
   }
 
   ast->valid = stdl_1;
   bar->bar_num = pkt.bar_num;
 }
-#endif
+
+#else
 
 void line256mp_down(line_down_scalars_t *bar, ast256mp_t *ast, ast_bp_t *ast_bp) {
   ast->half[0].empty = ast->half[1].empty = stdl_0; /* FIXME */
-  ast->half[1].sop = ast->half[1].eop = stdl_0; /* unused yet */
+
+  /* default values */
+  ast->half[0].sop = ast->half[0].eop = stdl_0;
+  ast->half[1].sop = ast->half[1].eop = stdl_0;
+  ast->valid = stdl_0;
 
   // first, take care of ej_ready; TODO: enhance
 #if 0
@@ -153,7 +168,7 @@ void line256mp_down(line_down_scalars_t *bar, ast256mp_t *ast, ast_bp_t *ast_bp)
 
   static TlpPacket pkt;
   static size_t count = 0;
-  static size_t nLines = /* some meaningless value */-1;
+  static size_t nLines = /* some meaningless value */-1, nSublines;
   static size_t payload_qw_end;
 
   static char yyy[1024];
@@ -188,6 +203,7 @@ void line256mp_down(line_down_scalars_t *bar, ast256mp_t *ast, ast_bp_t *ast_bp)
 
       /* hhhhdddd, dddddddd, ... */
       nLines = (head.rw.dw0.s.len + 3)/8 + 1;
+      nSublines = (head.rw.dw0.s.len + 3)/4 + 1;
 
       payload_qw_end = (head.rw.dw0.s.len >> 1) + 2;
       break;
@@ -211,6 +227,7 @@ void line256mp_down(line_down_scalars_t *bar, ast256mp_t *ast, ast_bp_t *ast_bp)
         assert((head.rw.dw0.s.len & 1) == 0);
 
         nLines = 1;
+        nSublines = 1;
       }
       break;
 
@@ -232,7 +249,6 @@ void line256mp_down(line_down_scalars_t *bar, ast256mp_t *ast, ast_bp_t *ast_bp)
   if(count == 0) {
     if(!recv_packet()) {
       /* no event found, just skip the line */
-      ast->valid = ast->half[0].sop = ast->half[0].eop = stdl_0;
       return;
     }
   } else {
@@ -242,8 +258,12 @@ void line256mp_down(line_down_scalars_t *bar, ast256mp_t *ast, ast_bp_t *ast_bp)
   }
 
   ast->valid = stdl_1;
-  ast->half[0].sop = count == 0 ? stdl_1 : stdl_0;
   bar->bar_num = pkt.bar_num;
+
+  if(0 == count)
+    ast->half[0].sop = stdl_1;
+  if(nLines - 1 == count)
+    ast->half[nSublines & 1 ? 0 : 1].eop = stdl_1;
 
   bufshow_line256mp(&streambuf, ast, count, payload_qw_end);
 
@@ -254,11 +274,9 @@ void line256mp_down(line_down_scalars_t *bar, ast256mp_t *ast, ast_bp_t *ast_bp)
       printf("DN: %s\n", streambuf.start);
 
     count = 0;
-    ast->half[0].eop = stdl_1;
-  } else {
-    ast->half[0].eop = stdl_0;
   }
 }
+#endif
 
 void line256_down(line_down_scalars_t *bar, ast256_t *ast, ast_bp_t *ast_bp) {
   ast->empty[0] = ast->empty[1] = stdl_0; /* FIXME */
