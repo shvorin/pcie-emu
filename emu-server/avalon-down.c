@@ -39,7 +39,7 @@ void line256mp_down(line_down_scalars_t *bar, ast256mp_t *ast, ast_bp_t *ast_bp)
   static TlpPacket pkt;
   static size_t nSublines = /* some meaningless value */-1;
   static size_t payload_qw_end;
-  tlp_header head;
+  static tlp_header head;
 
   static char yyy[1024];
   static streambuf_t streambuf = {.start = yyy, .end = yyy + sizeof(yyy)};
@@ -130,10 +130,13 @@ void line256mp_down(line_down_scalars_t *bar, ast256mp_t *ast, ast_bp_t *ast_bp)
 
     if(0 == count)
       ast->half[k].sop = stdl_1;
-    if(nSublines - 1 == count)
+    if(nSublines - 1 == count) {
       ast->half[k].eop = stdl_1;
+      ast->half[k].empty = head.rw.dw0.s.len & 2 ? stdl_1 : stdl_0;
+    }
 
-    bufshow_line256mp(&streambuf, ast, count, payload_qw_end);
+    //    if(k==0)
+    bufshow_line256mp(&streambuf, ast->half[k].data, count, payload_qw_end);
 
     ++count;
 

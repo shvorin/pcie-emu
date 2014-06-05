@@ -50,7 +50,7 @@ void line256mp_up(const ast256mp_t *ast) {
     return;
 
   static size_t count = 0;
-  static size_t nLines;
+  static size_t nLines, nSubLines;
 
   static char p_bdata[1024]; // FIXME: ad hoc
   static tlp_header head;
@@ -71,6 +71,7 @@ void line256mp_up(const ast256mp_t *ast) {
 
     /* hhhhdddd, dddddddd, ... */
     nLines = (head.rw.dw0.s.len + 3)/8 + 1;
+    nSubLines = (head.rw.dw0.s.len + 3)/4 + 1;
 
     bufshow_tlp_head(&streambuf, nLines, head);
 
@@ -92,7 +93,8 @@ void line256mp_up(const ast256mp_t *ast) {
     memcpy(p_bdata + 32 + 32 * (count - 2), ast->half[1].data, 16);
   }
 
-  bufshow_line256mp(&streambuf, ast, count - 1, payload_qw_end);
+  bufshow_line256mp(&streambuf, ast->half[0].data, 2 * count - 2, payload_qw_end);
+  bufshow_line256mp(&streambuf, ast->half[1].data, 2 * count - 1, payload_qw_end);
 
   if(nLines == count) /* tail arriverd */ {
     if(!emu_config.tlp_quiet)

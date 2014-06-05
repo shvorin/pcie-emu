@@ -25,12 +25,12 @@ int bufprintf(streambuf_t *sbuf, const char *fmt, ...) {
 }
 
 
-void bufshow_line256mp(streambuf_t *sbuf, const ast256mp_t *ast, size_t line_count, size_t payload_qw_end) {
+void bufshow_line256mp(streambuf_t *sbuf, const uint32_t *data, size_t subline_count, size_t payload_qw_end) {
   if(emu_config.tlp_quiet) return;
   char *fmt;
   int i;
-  for(i=0;i<4;++i) {
-    const size_t payload_qw_cnt = line_count * 4 + i;
+  for(i=0;i<2;++i) {
+    const size_t payload_qw_cnt = subline_count * 2 + i;
     if (payload_qw_cnt < 2 && emu_config.colorized_output) {
       /* TLP head */
       fmt = "\e[0;31m%016lX \e[0m";
@@ -41,8 +41,7 @@ void bufshow_line256mp(streambuf_t *sbuf, const ast256mp_t *ast, size_t line_cou
       fmt = "%016lX ";
     }
 
-    const uint32_t *data = i < 2 ? ast->half[0].data+2*i : ast->half[1].data+2*(i-2);
-    bufprintf(sbuf, fmt, *((uint64_t*)data));
+    bufprintf(sbuf, fmt, *((uint64_t*)(data + 2*i)));
   }
 }
 
