@@ -132,7 +132,7 @@ static void exec_pautina_config(const char *instanceId) {
     setenv("EMU_HIDDEN", "", 0);
     setenv("EMU_ID", instanceId, 1);
     const char path[] = "../../fpga-software/bin/pautina-config"; /* FIXME: ad hoc */
-    int res = execl(path, path, "-c", "-A", "0x10000000", "-L", "0x10000000", "-p", "1", (char*)NULL);
+    int res = execl(path, path, "-c", "-A", "0x10000000", "-L", "0x10000000", "-p", "1", "-s", "1", (char*)NULL);
     if(-1 == res)
       error(1, errno, "exec failed");
   } else if(pid == -1)
