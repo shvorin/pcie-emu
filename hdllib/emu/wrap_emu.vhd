@@ -6,8 +6,8 @@ use ieee.std_logic_1164.all;
 use work.types.all;
 use work.ast256.all;
 
--- emulation version of pautina_wrap
-entity pautina_wrap_emu is
+-- emulation version of wrap
+entity wrap_emu is
     port (
         clk   : in std_logic;
         reset : in std_logic;
@@ -19,6 +19,6 @@ entity pautina_wrap_emu is
         rx_st_bardec : in  std_logic_vector(7 downto 0));
 end entity;
 
-architecture pautina_wrap_emu of pautina_wrap_emu is
+architecture wrap_emu of wrap_emu is
 begin
 end architecture;
