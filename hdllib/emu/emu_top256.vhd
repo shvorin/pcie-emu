@@ -10,7 +10,6 @@ use ieee.std_logic_unsigned.all;
 
 use work.types.all;
 use work.util.all;
-use work.tlp_package.all;
 use work.ast256.all;
 
 entity emu_top256 is
