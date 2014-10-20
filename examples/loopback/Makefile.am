@@ -3,16 +3,14 @@
 
 bin_PROGRAMS = emu_top
 
-# FIXME: $(EMU_PATH) must be configured before running this makefile
 SUBDIRS = $(EMU_PATH)
 
 GHDL_LINKER_FLAGS = -Wl,-L$(EMU_PATH) -Wl,-lemu-server -Wl,-largtable2 -Wl,-lrt -o emu_top
 
 VHDL_EMU_SOURCES = ../../hdllib/emu/emu_top256.vhd					\
-	../../hdllib/emu/clock_gen.vhd ../../hdllib/emu/wrap_emu.vhd	\
-	../../hdllib/emu/emu_top_cfg.vhd ../../hdllib/common/types.vhd	\
+	../../hdllib/emu/clock_gen.vhd ../../hdllib/common/types.vhd	\
 	../../hdllib/common/util.vhd ../../hdllib/common/vdata.vhd		\
-	../../hdllib/common/ast256.vhd
+	../../hdllib/common/ast256.vhd wrap_emu.vhd emu_top_cfg.vhd
 
 emu: emu_top$(EXEEXT)
 
