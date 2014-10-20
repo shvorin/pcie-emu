@@ -3,7 +3,7 @@
 
 configuration emu_top_cfg of emu_top256 is
     for emu_top256
-        for app : ast_ext_io
+        for app : ast_io
             use entity work.wrap_emu;
         end for;
     end for;

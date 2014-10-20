@@ -40,7 +40,7 @@ package ast256 is
     ---------------------------------------------------------------------------
 
     constant ast_raw_width : natural := 256 + 6;
-    subtype  ast_raw_t is std_logic_vector(ast_raw_width - 1 downto 0);
+    subtype ast_raw_t is std_logic_vector(ast_raw_width - 1 downto 0);
 
     function combine(a : ast_t) return ast_raw_t;
     function parse(r   : ast_raw_t; valid : std_logic) return ast_t;
@@ -49,17 +49,6 @@ package ast256 is
 
     component ast_io
         port (
-            rx    : in  ast_t;
-            tx    : out ast_t;
-            tx_bp : in  ast_bp_t;
-            --
-            clk   : in  std_logic;
-            reset : in  std_logic);
-    end component;
-
-    -- extented with bardec
-    component ast_ext_io
-        port (
             ast_rx       : in  ast_t;
             ast_tx       : out ast_t;
             ast_tx_bp    : in  ast_bp_t;
@@ -67,18 +56,6 @@ package ast256 is
             --
             clk          : in  std_logic;
             reset        : in  std_logic);
-    end component;
-
-    component ast_bypass
-        port (
-            rx    : in  ast_t;
-            rx_bp : out ast_bp_t;
-            --
-            tx    : out ast_t;
-            tx_bp : in  ast_bp_t;
-            --
-            clk   : in  std_logic;
-            reset : in  std_logic);
     end component;
 end ast256;
 

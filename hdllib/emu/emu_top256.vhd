@@ -116,7 +116,7 @@ begin
         generic map (period)
         port map (clk, reset);
 
-    app : ast_ext_io
+    app : ast_io
         port map (
             clk          => clk,
             reset        => reset,
