@@ -51,7 +51,9 @@ struct emu_config_t emu_config = {
   .colorized_output = 0,
   .tlp_quiet = 0,
   .keep_alive = 0,
-  .no_pautina_config = 0,
+#ifdef WITH_INI_CLIENT
+  .no_ini_client = 0,
+#endif
 };
 
 static int dram_shm_fd;
@@ -118,10 +120,11 @@ static void usage(void **argtable, const char *progname) {
   arg_print_glossary(stdout, argtable,"  %-25s %s\n");
 }
 
+#ifdef WITH_INI_CLIENT
 static pid_t pid_pc = 0;
 
-static void exec_pautina_config(const char *instanceId) {
-  if(emu_config.no_pautina_config) {
+static void exec_ini_client(const char *instanceId) {
+  if(emu_config.no_ini_client) {
     pid_pc = 0;
     return;
   }
@@ -131,7 +134,7 @@ static void exec_pautina_config(const char *instanceId) {
     setenv("EMU", "", 0);
     setenv("EMU_HIDDEN", "", 0);
     setenv("EMU_ID", instanceId, 1);
-    const char path[] = "../../fpga-software/bin/pautina-config"; /* FIXME: ad hoc */
+    const char path[] = WITH_INI_CLIENT;
     int res = execl(path, path, "-c", "-A", "0x10000000", "-L", "0x10000000", "-p", "1", (char*)NULL);
     if(-1 == res)
       error(1, errno, "exec failed");
@@ -141,20 +144,20 @@ static void exec_pautina_config(const char *instanceId) {
    pid_pc = pid;
 }
 
-static void kill_pautina_config() {
+static void kill_ini_client() {
   if(!pid_pc)
     return;
 
   int res, status;
   res = kill(pid_pc, SIGTERM);
   if(-1 == res)
-    error(1, errno, "kill pautina-config failed, pid_pc: %d\n", pid_pc);
+    error(1, errno, "kill initializing client failed, pid_pc: %d\n", pid_pc);
 
   const pid_t pid_cld = wait(&status);
   if(pid_cld != pid_pc)
-    error(1, errno, "wait for pautina-config failed, pid_pc: %d, pid_cld: %d\n", pid_pc, pid_cld);
+    error(1, errno, "wait for initializing client failed, pid_pc: %d, pid_cld: %d\n", pid_pc, pid_cld);
 }
-
+#endif
 
 int main (int argc, char **argv) {
   /* 0. Parse command line arguments */
@@ -167,9 +170,15 @@ int main (int argc, char **argv) {
   struct arg_rex *color = arg_rex0(NULL, "color", "\\(^never$\\)\\|\\(^always$\\)\\|\\(^auto&\\)", "never|always|auto", 0, "colorized output");
   struct arg_lit *quiet = arg_lit0("q", "quiet", "do not show TLP stream");
   struct arg_lit *keep_alive = arg_lit0(NULL, "keep-alive", "keep running after last client hung up");
-  struct arg_lit *no_pautina_config = arg_lit0(NULL, "no-pautina-config", "do not spawn pautina-config on startup");
+#ifdef WITH_INI_CLIENT
+  struct arg_lit *no_ini_client = arg_lit0(NULL, "no-ini-client", "do not spawn initializing client on startup");
+#endif
 
-  void *argtable[] = {id, dbg, color, quiet, keep_alive, no_pautina_config, help, end};
+  void *argtable[] = {id, dbg, color, quiet, keep_alive,
+#ifdef WITH_INI_CLIENT
+                      no_ini_client,
+#endif
+                      help, end};
 
   /* 0.0. Check for '--help' global option */
   {
@@ -236,7 +245,9 @@ int main (int argc, char **argv) {
 
     emu_config.tlp_quiet = quiet->count > 0;
     emu_config.keep_alive = keep_alive->count > 0;
-    emu_config.no_pautina_config = no_pautina_config->count > 0;
+#ifdef WITH_INI_CLIENT
+    emu_config.no_ini_client = no_ini_client->count > 0;
+#endif
   }
 
   /* 0.3. make aliases */
@@ -303,8 +314,10 @@ int main (int argc, char **argv) {
 
   fclose(fd);
 
-  /* 2.x run client #0: pautina_config */
-  exec_pautina_config(instanceId);
+#ifdef WITH_INI_CLIENT
+  /* 2.x run client #0: ini_client */
+  exec_ini_client(instanceId);
+#endif
 
   /* 3 sockets */
   /* 3.1 create */
@@ -359,16 +372,23 @@ int main (int argc, char **argv) {
     const pid_t pid_cld = wait(&status);
     if(pid_cld == -1)
       ERROR(1, errno, "wait() failed");
+#ifdef WITH_INI_CLIENT
     else if(pid_cld == pid_pc) {
       pid_pc = 0;
-      printf("ok, pautina_config exited, status: %d, %d\n", status, WEXITSTATUS(status));
-    } else if(pid_cld == pid_sim) {
+      printf("ok, ini_client exited, status: %d, %d\n", status, WEXITSTATUS(status));
+    }
+#endif
+    else if(pid_cld == pid_sim) {
       pid_sim = 0;
       printf("simulator exited, status: %d, %d\n", status, WEXITSTATUS(status));
     } else {
       ERROR(1, 0, "wait(): unknown child %d, status: %d, %d\n", pid_cld, status, WEXITSTATUS(status));
     }
-  } while(pid_sim || pid_pc);
+  } while(pid_sim
+#ifdef WITH_INI_CLIENT
+          || pid_pc
+#endif
+          );
 
   /* 6. finalize */
   {
@@ -414,5 +434,7 @@ void acceptClient() {
 __attribute__((destructor))
 static void finalize() {
   printf("emu-server finalize\n");
-  kill_pautina_config();
+#ifdef WITH_INI_CLIENT
+  kill_ini_client();
+#endif
 }

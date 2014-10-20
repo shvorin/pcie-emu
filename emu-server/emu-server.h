@@ -13,7 +13,9 @@ extern struct emu_config_t {
   int colorized_output;
   int tlp_quiet;
   int keep_alive;
-  int no_pautina_config;
+#ifdef WITH_INI_CLIENT
+  int no_ini_client;
+#endif
 } emu_config;
 
 
