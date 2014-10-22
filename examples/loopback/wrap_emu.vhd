@@ -21,4 +21,5 @@ end entity;
 
 architecture wrap_emu of wrap_emu is
 begin
+    ast_tx <= nothing;
 end architecture;
